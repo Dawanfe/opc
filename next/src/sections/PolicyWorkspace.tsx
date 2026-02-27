@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Search, MapPin, Building2, Cpu, Briefcase, Phone, ChevronRight, Lock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiUrl } from '@/lib/utils';
 
 interface PolicyItem {
   id: number;
@@ -34,7 +35,7 @@ export default function PolicyWorkspace() {
   const [policies, setPolicies] = useState<PolicyItem[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/communities')
+    fetch(apiUrl('/api/admin/communities'))
       .then(res => res.json())
       .then(data => setPolicies(data))
       .catch(err => console.error('Failed to load policies:', err));

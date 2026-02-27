@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { apiUrl } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -93,7 +94,7 @@ export default function CommunitiesPage() {
 
   const fetchCommunities = async () => {
     try {
-      const res = await fetch('/api/admin/communities');
+      const res = await fetch(apiUrl('/api/admin/communities'));
       const data = await res.json();
       setCommunities(data);
     } catch (error) {
@@ -117,7 +118,7 @@ export default function CommunitiesPage() {
     setIsLoading(true);
     try {
       const method = currentCommunity.id ? 'PUT' : 'POST';
-      const res = await fetch('/api/admin/communities', {
+      const res = await fetch(apiUrl('/api/admin/communities'), {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(currentCommunity),
@@ -140,7 +141,7 @@ export default function CommunitiesPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`/api/admin/communities?id=${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/communities?id=${id}`), {
         method: 'DELETE',
       });
 
@@ -159,7 +160,7 @@ export default function CommunitiesPage() {
     if (selectedIds.length === 0) return;
 
     try {
-      const res = await fetch(`/api/admin/communities?ids=${selectedIds.join(',')}`, {
+      const res = await fetch(apiUrl(`/api/admin/communities?ids=${selectedIds.join(',')}`), {
         method: 'DELETE',
       });
 

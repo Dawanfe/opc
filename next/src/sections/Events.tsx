@@ -7,6 +7,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { apiUrl } from '@/lib/utils';
 
 interface Event {
   id: number;
@@ -24,7 +25,7 @@ export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/events')
+    fetch(apiUrl('/api/admin/events'))
       .then(res => res.json())
       .then(data => {
         // 按日期排序，取最新的活动

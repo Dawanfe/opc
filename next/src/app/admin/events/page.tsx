@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { apiUrl } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -77,7 +78,7 @@ export default function EventsPage() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch('/api/admin/events');
+      const res = await fetch(apiUrl('/api/admin/events'));
       const data = await res.json();
       setEvents(data);
     } catch (error) {
@@ -101,7 +102,7 @@ export default function EventsPage() {
     setIsLoading(true);
     try {
       const method = currentEvent.id ? 'PUT' : 'POST';
-      const res = await fetch('/api/admin/events', {
+      const res = await fetch(apiUrl('/api/admin/events'), {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(currentEvent),
@@ -124,7 +125,7 @@ export default function EventsPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`/api/admin/events?id=${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/events?id=${id}`), {
         method: 'DELETE',
       });
 
@@ -143,7 +144,7 @@ export default function EventsPage() {
     if (selectedIds.length === 0) return;
 
     try {
-      const res = await fetch(`/api/admin/events?ids=${selectedIds.join(',')}`, {
+      const res = await fetch(apiUrl(`/api/admin/events?ids=${selectedIds.join(',')}`), {
         method: 'DELETE',
       });
 

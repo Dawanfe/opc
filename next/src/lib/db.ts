@@ -27,7 +27,8 @@ export function getDb() {
 
 // 初始化数据库表
 export function initDb() {
-  const db = getDb();
+  const db = new Database(dbPath);
+  db.pragma('journal_mode = WAL');
 
   // 创建 Communities 表
   db.exec(`

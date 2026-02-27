@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { apiUrl } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -77,7 +78,7 @@ export default function NewsPage() {
 
   const fetchNews = async () => {
     try {
-      const res = await fetch('/api/admin/news');
+      const res = await fetch(apiUrl('/api/admin/news'));
       const data = await res.json();
       setNewsList(data);
     } catch (error) {
@@ -101,7 +102,7 @@ export default function NewsPage() {
     setIsLoading(true);
     try {
       const method = currentNews.id ? 'PUT' : 'POST';
-      const res = await fetch('/api/admin/news', {
+      const res = await fetch(apiUrl('/api/admin/news'), {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(currentNews),
@@ -124,7 +125,7 @@ export default function NewsPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`/api/admin/news?id=${id}`, {
+      const res = await fetch(apiUrl(`/api/admin/news?id=${id}`), {
         method: 'DELETE',
       });
 
@@ -143,7 +144,7 @@ export default function NewsPage() {
     if (selectedIds.length === 0) return;
 
     try {
-      const res = await fetch(`/api/admin/news?ids=${selectedIds.join(',')}`, {
+      const res = await fetch(apiUrl(`/api/admin/news?ids=${selectedIds.join(',')}`), {
         method: 'DELETE',
       });
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Newspaper, ExternalLink, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { apiUrl } from '@/lib/utils';
 
 interface NewsItem {
   id: number;
@@ -39,7 +40,7 @@ export default function DailyNews() {
   const [news, setNews] = useState<NewsItem[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/news')
+    fetch(apiUrl('/api/admin/news'))
       .then(res => res.json())
       .then(data => {
         const validNews = data.filter((n: NewsItem) => n.title && n.title !== 'NaN');

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { apiUrl } from '@/lib/utils';
 
 export default function TestAuthPage() {
   const [result, setResult] = useState('');
@@ -15,7 +16,7 @@ export default function TestAuthPage() {
     setResult('Testing...');
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(apiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -47,7 +48,7 @@ export default function TestAuthPage() {
 
     try {
       // First register
-      const regResponse = await fetch('/api/auth/register', {
+      const regResponse = await fetch(apiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -61,7 +62,7 @@ export default function TestAuthPage() {
 
       if (regResponse.ok) {
         // Then login
-        const loginResponse = await fetch('/api/auth/login', {
+        const loginResponse = await fetch(apiUrl('/api/auth/login'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

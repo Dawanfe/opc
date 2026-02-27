@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiUrl } from '@/lib/utils';
 
 interface AppSidebarProps {
   isMobileOpen: boolean;
@@ -60,7 +61,7 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-gray-100">
-          <img src="/logo.png" alt="WeOPC" className="w-[128px] object-contain" />
+          <img src={apiUrl("/logo.png")} alt="WeOPC" className="w-[128px] object-contain" />
           <button
             onClick={onMobileClose}
             className="lg:hidden ml-auto p-1.5 text-gray-400 hover:text-gray-600"
@@ -144,7 +145,7 @@ export function MobileHeader({ onMenuClick }: { onMenuClick: () => void }) {
     <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-100 px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="WeOPC" className="w-[128px] object-contain" />
+            <img src={apiUrl("/logo.png")} alt="WeOPC" className="w-[128px] object-contain" />
           </div>
         <button
           onClick={onMenuClick}

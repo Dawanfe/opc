@@ -1,0 +1,45 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: weopc-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - weopc-app
+    networks:
+      - weopc-network
+
+  weopc-app:
+    build:
+      context: ./next
+      dockerfile: Dockerfile
+    container_name: weopc-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-${RANDOM}
+      - BASE_PATH=/weopc
+    volumes:
+      - weopc-data:/app/data
+    networks:
+      - weopc-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/weopc', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  weopc-data:
+    driver: local
+
+networks:
+  weopc-network:
+    driver: bridge

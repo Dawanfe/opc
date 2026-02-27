@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Production
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Local env files
+.env
+.env*.local
+.env.development.local
+.env.test.local
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Deployment
+*.tar.gz
+backups/
+
+# Test files
+test-auth.mjs
+
+# Logs
+logs/
+*.log
+nginx/logs/
+
+# SSL certificates (don't commit private keys)
+nginx/ssl/*.key
+nginx/ssl/*.pem
+
+# OS
+.DS_Store
+Thumbs.db

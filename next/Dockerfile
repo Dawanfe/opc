@@ -1,52 +1,72 @@
 # Multi-stage build for Next.js application
 FROM node:20-alpine AS base
 
+# 配置 Alpine 阿里云镜像源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 # Install dependencies only when needed
 FROM base AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-RUN npm ci
 
-# Rebuild the source code only when needed
+# better-sqlite3 的预编译二进制从 GitHub 下载，使用 npmmirror 代理加速
+ENV npm_config_better_sqlite3_binary_host=https://registry.npmmirror.com/-/binary/better-sqlite3
+
+RUN npm ci --registry=https://registry.npmmirror.com --loglevel=info
+
+# Build stage
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV BASE_PATH=/weopc
 
-# Build Next.js application (不在构建时初始化数据库)
 RUN npm run build
 
-# Production image, copy all the files and run next
+# 用 esbuild 将数据库初始化脚本编译为 JS（避免运行时依赖 tsx）
+RUN ./node_modules/.bin/esbuild scripts/init-db.ts \
+  --bundle \
+  --platform=node \
+  --packages=external \
+  --outfile=scripts/init-db.js
+
+# Production stage
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create a non-root user
+RUN apk add --no-cache wget sqlite
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files
+# Copy standalone output
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-# 不复制构建时的 data 目录，使用 Volume 挂载
 
-# 复制数据库初始化脚本
-COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/src/lib/db.ts ./src/lib/db.ts
-COPY --from=builder /app/tsconfig.json ./tsconfig.json
+# Copy DB init resources (compiled JS + seed data)
+COPY --from=builder /app/scripts/init-db.js ./scripts/init-db.js
+COPY --from=builder /app/src/data ./src/data
+COPY --from=builder /app/public/communities.json ./public/communities.json
+COPY --from=builder /app/public/events.json ./public/events.json
+COPY --from=builder /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
+COPY --from=builder /app/node_modules/bindings ./node_modules/bindings
+COPY --from=builder /app/node_modules/file-uri-to-path ./node_modules/file-uri-to-path
 
-# Set correct permissions
-RUN chown -R nextjs:nodejs /app
+# Copy entrypoint
+COPY entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+# Ensure data directory exists and is writable
+RUN mkdir -p /app/data && chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -55,5 +75,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# 启动脚本：首次启动时初始化数据库
-CMD sh -c "if [ ! -f /app/data/opc.db ]; then echo 'Initializing database...'; node -r tsx/register scripts/init-db.ts; fi && node server.js"
+ENTRYPOINT ["./entrypoint.sh"]

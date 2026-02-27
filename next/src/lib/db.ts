@@ -1,12 +1,27 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
 const dbPath = path.join(process.cwd(), 'data', 'opc.db');
+let dbInitialized = false;
+
+// 确保data目录存在
+const dataDir = path.dirname(dbPath);
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
 
 // 创建数据库实例
 export function getDb() {
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
+
+  // 首次调用时自动初始化数据库表
+  if (!dbInitialized) {
+    initDb();
+    dbInitialized = true;
+  }
+
   return db;
 }
 

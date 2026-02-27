@@ -1,0 +1,115 @@
+name: Deploy WeOPC
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Daily backup at 3:00 AM (UTC+8 = 19:00 UTC previous day)
+    - cron: '0 19 * * *'
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          REPO_URL: ${{ secrets.REPO_URL }}
+          GH_REPO: ${{ github.repository }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          envs: JWT_SECRET,REPO_URL,GH_REPO
+          script: |
+            set -e
+
+            DEPLOY_PATH="/opt/weopc"
+            BACKUP_DIR="$DEPLOY_PATH/db-backups"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+            echo "=== [1/6] Prepare deployment directory ==="
+            mkdir -p "$DEPLOY_PATH"
+            mkdir -p "$BACKUP_DIR"
+
+            echo "=== [2/6] Backup existing database ==="
+            VOLUME_PATH=$(docker volume inspect weopc-data --format '{{.Mountpoint}}' 2>/dev/null || echo "")
+            if [ -n "$VOLUME_PATH" ] && [ -f "$VOLUME_PATH/opc.db" ]; then
+              echo "Backing up database from volume..."
+              cp "$VOLUME_PATH/opc.db" "$BACKUP_DIR/opc_deploy_${TIMESTAMP}.db"
+              # Keep only last 20 deploy backups
+              cd "$BACKUP_DIR" && ls -t opc_deploy_*.db 2>/dev/null | tail -n +21 | xargs rm -f 2>/dev/null || true
+              echo "Backup saved: opc_deploy_${TIMESTAMP}.db"
+            else
+              echo "No existing database found (first deploy), skipping backup."
+            fi
+
+            echo "=== [3/6] Pull latest code ==="
+            cd "$DEPLOY_PATH"
+            if [ -d ".git" ]; then
+              git fetch origin main
+              git reset --hard origin/main
+            else
+              CLONE_URL="${REPO_URL:-https://github.com/${GH_REPO}.git}"
+              git clone --branch main "$CLONE_URL" .
+            fi
+
+            echo "=== [4/6] Ensure Docker network exists ==="
+            docker network create web_network 2>/dev/null || true
+
+            echo "=== [5/6] Build and deploy ==="
+            echo "JWT_SECRET=${JWT_SECRET}" > .env
+
+            docker compose build --no-cache
+            docker compose up -d --force-recreate
+
+            echo "=== [6/6] Verify deployment ==="
+            echo "Waiting for health check..."
+            sleep 10
+            for i in $(seq 1 12); do
+              if docker compose ps | grep -q "healthy"; then
+                echo "Deployment successful! Service is healthy."
+                exit 0
+              fi
+              echo "Attempt $i/12: waiting..."
+              sleep 5
+            done
+
+            echo "WARNING: Service did not become healthy. Logs:"
+            docker compose logs --tail=50
+            exit 1
+
+  backup:
+    name: Scheduled Database Backup
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Backup database via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            BACKUP_DIR="/opt/weopc/db-backups"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            mkdir -p "$BACKUP_DIR"
+
+            VOLUME_PATH=$(docker volume inspect weopc-data --format '{{.Mountpoint}}' 2>/dev/null || echo "")
+            if [ -n "$VOLUME_PATH" ] && [ -f "$VOLUME_PATH/opc.db" ]; then
+              cp "$VOLUME_PATH/opc.db" "$BACKUP_DIR/opc_scheduled_${TIMESTAMP}.db"
+              # Keep only last 30 scheduled backups
+              cd "$BACKUP_DIR" && ls -t opc_scheduled_*.db 2>/dev/null | tail -n +31 | xargs rm -f 2>/dev/null || true
+              echo "Scheduled backup complete: opc_scheduled_${TIMESTAMP}.db"
+            else
+              echo "No database found to backup."
+              exit 1
+            fi

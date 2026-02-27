@@ -14,3 +14,7 @@ coverage
 *.swp
 *.swo
 test-auth.mjs
+data
+*.db
+*.db-shm
+*.db-wal

@@ -34,7 +34,8 @@ export default function TestAuthPage() {
         data: data,
       }, null, 2));
     } catch (error) {
-      setResult(`Error: ${error.message}\n${error.stack}`);
+      const err = error as Error;
+      setResult(`Error: ${err.message}\n${err.stack}`);
     } finally {
       setLoading(false);
     }
@@ -79,7 +80,8 @@ export default function TestAuthPage() {
         setResult(`Register failed: ${JSON.stringify(regData, null, 2)}`);
       }
     } catch (error) {
-      setResult(`Error: ${error.message}\n${error.stack}`);
+      const err = error as Error;
+      setResult(`Error: ${err.message}\n${err.stack}`);
     } finally {
       setLoading(false);
     }

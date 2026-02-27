@@ -28,14 +28,16 @@ export default function Profile() {
 
   const handleLogin = () => {
     if (loginForm.phone && loginForm.code) {
-      login();
+      // TODO: Implement phone login
+      login(loginForm.phone, loginForm.code);
       setIsLoginModalOpen(false);
     }
   };
 
   const handleRegister = () => {
     if (registerForm.name && registerForm.phone) {
-      login();
+      // TODO: Implement registration and auto-login
+      login(registerForm.phone, 'temporary-password');
       setIsRegisterModalOpen(false);
     }
   };

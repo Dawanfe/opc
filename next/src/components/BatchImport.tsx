@@ -21,6 +21,7 @@ import {
 import { Download, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadTemplate, parseExcelFile, deduplicateData } from '@/lib/excelTemplate';
+import { apiUrl } from '@/lib/utils';
 
 interface BatchImportProps<T> {
   templateType: 'communities' | 'events' | 'news' | 'demands';
@@ -85,7 +86,7 @@ export default function BatchImport<T extends Record<string, any>>({
 
     setIsLoading(true);
     try {
-      const res = await fetch(apiEndpoint, {
+      const res = await fetch(apiUrl(apiEndpoint), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: importPreview.toAdd }),

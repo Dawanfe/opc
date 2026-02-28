@@ -70,17 +70,13 @@ export default function Dashboard() {
           <span className="text-sm font-medium text-gray-600">Global AI Alumni Alliance</span>
         </div>
 
-        {/* Logo: mp4 animation + text */}
+        {/* Logo: GIF animation + text */}
         <div className="flex flex-col items-center gap-6 mb-8">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
+          <img
+            src={apiUrl("/logo.GIF")}
+            alt="WeOPC Logo"
             className="w-24 h-24 md:w-32 md:h-32"
-          >
-            <source src={apiUrl("/logo.mp4")} type="video/mp4" />
-          </video>
+          />
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#3a3a3a] tracking-tight">
             W<span className="text-[#3a3a3a]">e</span>OPC
           </h1>

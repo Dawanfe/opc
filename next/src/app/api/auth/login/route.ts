@@ -5,32 +5,32 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// POST - 用户登录
+// POST - 用户登录（手机号+密码）
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { username, password } = body;
+    const { phone, password } = body;
 
     // 验证必填字段
-    if (!username || !password) {
+    if (!phone || !password) {
       return NextResponse.json(
-        { error: '用户名和密码为必填项' },
+        { error: '手机号和密码为必填项' },
         { status: 400 }
       );
     }
 
     const db = getDb();
 
-    // 查找用户 (支持用户名或邮箱登录)
+    // 通过手机号查找用户
     const user = db.prepare(
-      'SELECT * FROM users WHERE username = ? OR email = ?'
-    ).get(username, username) as any;
+      'SELECT * FROM users WHERE phone = ?'
+    ).get(phone) as any;
 
     db.close();
 
     if (!user) {
       return NextResponse.json(
-        { error: '用户名或密码错误' },
+        { error: '手机号或密码错误' },
         { status: 401 }
       );
     }
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { error: '用户名或密码错误' },
+        { error: '手机号或密码错误' },
         { status: 401 }
       );
     }
@@ -48,8 +48,7 @@ export async function POST(request: NextRequest) {
     const token = jwt.sign(
       {
         userId: user.id,
-        username: user.username,
-        email: user.email,
+        phone: user.phone,
       },
       JWT_SECRET,
       { expiresIn: '7d' }

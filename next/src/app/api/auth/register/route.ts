@@ -2,25 +2,24 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
-// POST - 用户注册
+// POST - 用户注册（手机号+密码）
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { username, email, password, nickname } = body;
+    const { phone, password, nickname } = body;
 
     // 验证必填字段
-    if (!username || !email || !password) {
+    if (!phone || !password) {
       return NextResponse.json(
-        { error: '用户名、邮箱和密码为必填项' },
+        { error: '手机号和密码为必填项' },
         { status: 400 }
       );
     }
 
-    // 验证邮箱格式
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // 验证手机号格式（11位数字）
+    if (!/^1\d{10}$/.test(phone)) {
       return NextResponse.json(
-        { error: '邮箱格式不正确' },
+        { error: '请输入正确的手机号' },
         { status: 400 }
       );
     }
@@ -35,22 +34,12 @@ export async function POST(request: NextRequest) {
 
     const db = getDb();
 
-    // 检查用户名是否已存在
-    const existingUser = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
+    // 检查手机号是否已注册
+    const existingUser = db.prepare('SELECT id FROM users WHERE phone = ?').get(phone);
     if (existingUser) {
       db.close();
       return NextResponse.json(
-        { error: '用户名已存在' },
-        { status: 409 }
-      );
-    }
-
-    // 检查邮箱是否已存在
-    const existingEmail = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existingEmail) {
-      db.close();
-      return NextResponse.json(
-        { error: '邮箱已被注册' },
+        { error: '该手机号已注册' },
         { status: 409 }
       );
     }
@@ -60,12 +49,12 @@ export async function POST(request: NextRequest) {
 
     // 插入新用户
     const result = db.prepare(`
-      INSERT INTO users (username, email, password, nickname)
-      VALUES (?, ?, ?, ?)
-    `).run(username, email, hashedPassword, nickname || username);
+      INSERT INTO users (phone, password, nickname, membershipType)
+      VALUES (?, ?, ?, 'free')
+    `).run(phone, hashedPassword, nickname || `用户${phone.slice(-4)}`);
 
     const newUser = db.prepare(
-      'SELECT id, username, email, nickname, createdAt FROM users WHERE id = ?'
+      'SELECT id, phone, nickname, membershipType, createdAt FROM users WHERE id = ?'
     ).get(result.lastInsertRowid);
 
     db.close();

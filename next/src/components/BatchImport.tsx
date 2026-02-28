@@ -23,7 +23,7 @@ import { toast } from 'sonner';
 import { downloadTemplate, parseExcelFile, deduplicateData } from '@/lib/excelTemplate';
 
 interface BatchImportProps<T> {
-  templateType: 'communities' | 'events' | 'news';
+  templateType: 'communities' | 'events' | 'news' | 'demands';
   existingData: T[];
   uniqueKey: string;
   onImportSuccess: () => void;

@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import AppSidebar, { MobileHeader } from './AppSidebar';
 import LoginModal from './LoginModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const { showLoginModal, setShowLoginModal } = useAuth();
 
   // 如果是管理后台页面,不显示导航
   const isAdminPage = pathname?.startsWith('/admin');
@@ -41,7 +43,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Login Modal */}
-      <LoginModal />
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </div>
   );
 }

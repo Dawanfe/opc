@@ -93,15 +93,65 @@ export function initDb() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      email TEXT UNIQUE NOT NULL,
+      phone TEXT UNIQUE NOT NULL,
+      username TEXT,
+      email TEXT,
       password TEXT NOT NULL,
       nickname TEXT,
       avatar TEXT,
+      membershipType TEXT DEFAULT 'free',
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // 创建 Demands 表 (需求广场)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS demands (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      category TEXT,
+      budget TEXT,
+      deadline TEXT,
+      description TEXT,
+      requirements TEXT,
+      postedBy TEXT,
+      postedAt TEXT,
+      contact TEXT,
+      status TEXT DEFAULT 'open',
+      auditStatus TEXT DEFAULT 'pending',
+      rejectReason TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 兼容旧表：如果 demands 表已存在但没有 contact 列，自动添加
+  try {
+    db.exec(`ALTER TABLE demands ADD COLUMN contact TEXT`);
+  } catch {
+    // 列已存在，忽略
+  }
+
+  // 初始化 Demands 种子数据（仅在表为空时插入）
+  const demandCount = db.prepare('SELECT COUNT(*) as count FROM demands').get() as any;
+  if (demandCount.count === 0) {
+    const insertDemand = db.prepare(`
+      INSERT INTO demands (title, category, budget, deadline, description, requirements, postedBy, postedAt, status, auditStatus)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const seedDemands = db.transaction(() => {
+      insertDemand.run('AI漫剧《未来都市》角色设计', 'ai-comic', '¥5,000 - ¥8,000', '2026-03-15', '需要为科幻题材AI漫剧设计主要角色形象，包含主角3人、配角5人，要求风格统一，适合AI生成 workflow。', '熟练使用 Midjourney/Stable Diffusion,有漫画角色设计经验,能输出角色设定文档', '未来视界传媒', '2026-02-25', 'open', 'approved');
+      insertDemand.run('企业宣传视频后期剪辑', 'video-edit', '¥3,000 - ¥5,000', '2026-03-10', '科技公司产品发布会视频剪辑，时长约5分钟，需要添加字幕、特效和背景音乐。', '熟练使用 Premiere Pro / Final Cut,有商业视频剪辑经验,能理解科技产品调性', '创新科技有限公司', '2026-02-26', 'open', 'approved');
+      insertDemand.run('智能客服对话系统开发', 'ai-dev', '¥20,000 - ¥35,000', '2026-04-01', '基于大语言模型的智能客服系统，需要支持多轮对话、知识库检索、工单自动创建等功能。', '熟悉 Python / Node.js,有 LLM API 集成经验,了解 RAG 技术', '云智科技', '2026-02-24', 'open', 'approved');
+      insertDemand.run('AI生成短视频批量制作', 'video-edit', '¥8,000 - ¥12,000', '2026-03-20', '需要制作30条电商产品推广短视频，每条15-30秒，使用AI工具辅助生成素材。', '熟练使用剪映/CapCut,了解 AI 视频生成工具,有电商视频制作经验', '优选电商', '2026-02-27', 'open', 'approved');
+      insertDemand.run('AI绘本插画绘制', 'ai-comic', '¥10,000 - ¥15,000', '2026-03-30', '儿童绘本项目，需要绘制20页插画，风格温馨可爱，适合3-6岁儿童。', '有儿童插画经验,熟练使用 AI 绘画工具,能配合修改调整', '童趣出版社', '2026-02-23', 'open', 'approved');
+      insertDemand.run('AI Agent 自动化工作流开发', 'ai-dev', '¥15,000 - ¥25,000', '2026-03-25', '开发自动化内容发布Agent，实现从选题、写作、配图到多平台发布的全流程自动化。', '熟悉 LangChain / AutoGen,有 API 集成经验,了解内容运营流程', '自媒体工作室', '2026-02-26', 'open', 'approved');
+    });
+
+    seedDemands();
+  }
 
   db.close();
 }

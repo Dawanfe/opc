@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, Clock, DollarSign, User, Briefcase, Wand2, Video, Code } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiUrl } from '@/lib/utils';
 
 interface Gig {
-  id: string;
+  id: number;
   title: string;
   category: 'ai-comic' | 'video-edit' | 'ai-dev' | 'other';
   budget: string;
   deadline: string;
   description: string;
-  requirements: string[];
+  requirements: string;
   postedBy: string;
   postedAt: string;
   status: 'open' | 'in-progress' | 'completed';
@@ -26,114 +27,97 @@ const categories = [
   { id: 'other', label: '其他', icon: Briefcase },
 ];
 
-const sampleGigs: Gig[] = [
-  {
-    id: '1',
-    title: 'AI漫剧《未来都市》角色设计',
-    category: 'ai-comic',
-    budget: '¥5,000 - ¥8,000',
-    deadline: '2026-03-15',
-    description: '需要为科幻题材AI漫剧设计主要角色形象，包含主角3人、配角5人，要求风格统一，适合AI生成 workflow。',
-    requirements: ['熟练使用 Midjourney/Stable Diffusion', '有漫画角色设计经验', '能输出角色设定文档'],
-    postedBy: '未来视界传媒',
-    postedAt: '2026-02-25',
-    status: 'open',
-  },
-  {
-    id: '2',
-    title: '企业宣传视频后期剪辑',
-    category: 'video-edit',
-    budget: '¥3,000 - ¥5,000',
-    deadline: '2026-03-10',
-    description: '科技公司产品发布会视频剪辑，时长约5分钟，需要添加字幕、特效和背景音乐。',
-    requirements: ['熟练使用 Premiere Pro / Final Cut', '有商业视频剪辑经验', '能理解科技产品调性'],
-    postedBy: '创新科技有限公司',
-    postedAt: '2026-02-26',
-    status: 'open',
-  },
-  {
-    id: '3',
-    title: '智能客服对话系统开发',
-    category: 'ai-dev',
-    budget: '¥20,000 - ¥35,000',
-    deadline: '2026-04-01',
-    description: '基于大语言模型的智能客服系统，需要支持多轮对话、知识库检索、工单自动创建等功能。',
-    requirements: ['熟悉 Python / Node.js', '有 LLM API 集成经验', '了解 RAG 技术'],
-    postedBy: '云智科技',
-    postedAt: '2026-02-24',
-    status: 'open',
-  },
-  {
-    id: '4',
-    title: 'AI生成短视频批量制作',
-    category: 'video-edit',
-    budget: '¥8,000 - ¥12,000',
-    deadline: '2026-03-20',
-    description: '需要制作30条电商产品推广短视频，每条15-30秒，使用AI工具辅助生成素材。',
-    requirements: ['熟练使用剪映/CapCut', '了解 AI 视频生成工具', '有电商视频制作经验'],
-    postedBy: '优选电商',
-    postedAt: '2026-02-27',
-    status: 'open',
-  },
-  {
-    id: '5',
-    title: 'AI绘本插画绘制',
-    category: 'ai-comic',
-    budget: '¥10,000 - ¥15,000',
-    deadline: '2026-03-30',
-    description: '儿童绘本项目，需要绘制20页插画，风格温馨可爱，适合3-6岁儿童。',
-    requirements: ['有儿童插画经验', '熟练使用 AI 绘画工具', '能配合修改调整'],
-    postedBy: '童趣出版社',
-    postedAt: '2026-02-23',
-    status: 'open',
-  },
-  {
-    id: '6',
-    title: 'AI Agent 自动化工作流开发',
-    category: 'ai-dev',
-    budget: '¥15,000 - ¥25,000',
-    deadline: '2026-03-25',
-    description: '开发自动化内容发布Agent，实现从选题、写作、配图到多平台发布的全流程自动化。',
-    requirements: ['熟悉 LangChain / AutoGen', '有 API 集成经验', '了解内容运营流程'],
-    postedBy: '自媒体工作室',
-    postedAt: '2026-02-26',
-    status: 'open',
-  },
-];
-
 export default function AIGigMarketplace() {
-  const { isLoggedIn, openLoginModal } = useAuth();
+  const { isLoggedIn, setShowLoginModal } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedGig, setSelectedGig] = useState<Gig | null>(null);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [gigs, setGigs] = useState<Gig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const filteredGigs = sampleGigs.filter(gig => {
+  // 发布订单表单状态
+  const [postForm, setPostForm] = useState({
+    title: '',
+    category: '',
+    budget: '',
+    deadline: '',
+    description: '',
+    contact: '',
+  });
+
+  useEffect(() => {
+    fetchGigs();
+  }, []);
+
+  const fetchGigs = async () => {
+    try {
+      const res = await fetch(apiUrl('/api/demands'));
+      if (res.ok) {
+        const data = await res.json();
+        setGigs(data);
+      }
+    } catch (error) {
+      console.error('获取需求列表失败:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredGigs = gigs.filter(gig => {
     const matchesSearch = gig.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         gig.description.toLowerCase().includes(searchQuery.toLowerCase());
+                         gig.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || gig.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const handleApply = (gig: Gig) => {
     if (!isLoggedIn) {
-      openLoginModal();
+      setShowLoginModal(true);
       return;
     }
     setSelectedGig(gig);
     setIsApplyModalOpen(true);
   };
 
-  const handlePostOrder = () => {
-    setIsPostModalOpen(false);
-    setShowSuccessMessage(true);
+  const handlePostOrder = async () => {
+    if (!postForm.title.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('user_token');
+      const res = await fetch(apiUrl('/api/demands'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(postForm),
+      });
+
+      if (res.ok) {
+        setIsPostModalOpen(false);
+        setShowSuccessMessage(true);
+        setPostForm({ title: '', category: '', budget: '', deadline: '', description: '', contact: '' });
+      }
+    } catch (error) {
+      console.error('发布订单失败:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getCategoryLabel = (categoryId: string) => {
     const cat = categories.find(c => c.id === categoryId);
     return cat?.label || categoryId;
+  };
+
+  const getRequirementsList = (requirements: string): string[] => {
+    if (!requirements) return [];
+    return requirements.split(',').map(r => r.trim()).filter(Boolean);
   };
 
   return (
@@ -145,7 +129,7 @@ export default function AIGigMarketplace() {
           <p className="text-body">发布订单或承接任务,优先找到AI时代新机遇</p>
         </div>
         <button
-          onClick={() => isLoggedIn ? setIsPostModalOpen(true) : openLoginModal()}
+          onClick={() => isLoggedIn ? setIsPostModalOpen(true) : setShowLoginModal(true)}
           className="btn-primary"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -188,65 +172,74 @@ export default function AIGigMarketplace() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-12">
+          <p className="text-[#6B7280]">加载中...</p>
+        </div>
+      )}
+
       {/* Gig List */}
-      <div className="space-y-3">
-        {filteredGigs.map((gig) => (
-            <div 
-              key={gig.id}
-              className="opc-card p-5 hover:border-gray-200 transition-all duration-150"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`
-                      px-2 py-0.5 rounded text-xs font-medium
-                      ${gig.category === 'ai-comic' ? 'bg-[#EC4899]/10 text-[#EC4899]' : ''}
-                      ${gig.category === 'video-edit' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : ''}
-                      ${gig.category === 'ai-dev' ? 'bg-[#22C55E]/10 text-[#22C55E]' : ''}
-                      ${gig.category === 'other' ? 'bg-gray-100 text-[#6B7280]' : ''}
-                    `}>
-                      {getCategoryLabel(gig.category)}
-                    </span>
-                    <span className="text-xs text-[#9CA3AF]">{gig.postedAt} 发布</span>
+      {!isLoading && (
+        <div className="space-y-3">
+          {filteredGigs.map((gig) => (
+              <div
+                key={gig.id}
+                className="opc-card p-5 hover:border-gray-200 transition-all duration-150"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`
+                        px-2 py-0.5 rounded text-xs font-medium
+                        ${gig.category === 'ai-comic' ? 'bg-[#EC4899]/10 text-[#EC4899]' : ''}
+                        ${gig.category === 'video-edit' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : ''}
+                        ${gig.category === 'ai-dev' ? 'bg-[#22C55E]/10 text-[#22C55E]' : ''}
+                        ${gig.category === 'other' ? 'bg-gray-100 text-[#6B7280]' : ''}
+                      `}>
+                        {getCategoryLabel(gig.category)}
+                      </span>
+                      <span className="text-xs text-[#9CA3AF]">{gig.postedAt} 发布</span>
+                    </div>
+
+                    <h3 className="text-base font-medium text-[#111827] mb-2">
+                      {gig.title}
+                    </h3>
+
+                    <p className="text-sm text-[#6B7280] line-clamp-2 mb-3">
+                      {gig.description}
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1.5 text-[#111827]">
+                        <DollarSign className="w-4 h-4 text-[#22C55E]" />
+                        <span className="font-medium">{gig.budget}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[#6B7280]">
+                        <Clock className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>截止 {gig.deadline}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[#6B7280]">
+                        <User className="w-4 h-4 text-[#9CA3AF]" />
+                        <span>{gig.postedBy}</span>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <h3 className="text-base font-medium text-[#111827] mb-2">
-                    {gig.title}
-                  </h3>
-                  
-                  <p className="text-sm text-[#6B7280] line-clamp-2 mb-3">
-                    {gig.description}
-                  </p>
-                  
-                  <div className="flex flex-wrap items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1.5 text-[#111827]">
-                      <DollarSign className="w-4 h-4 text-[#22C55E]" />
-                      <span className="font-medium">{gig.budget}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#6B7280]">
-                      <Clock className="w-4 h-4 text-[#9CA3AF]" />
-                      <span>截止 {gig.deadline}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#6B7280]">
-                      <User className="w-4 h-4 text-[#9CA3AF]" />
-                      <span>{gig.postedBy}</span>
-                    </div>
-                  </div>
+
+                  <button
+                    onClick={() => handleApply(gig)}
+                    className="btn-primary whitespace-nowrap"
+                  >
+                    我要接单
+                  </button>
                 </div>
-                
-                <button 
-                  onClick={() => handleApply(gig)}
-                  className="btn-primary whitespace-nowrap"
-                >
-                  我要接单
-                </button>
               </div>
-            </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Empty State */}
-      {filteredGigs.length === 0 && (
+      {!isLoading && filteredGigs.length === 0 && (
         <div className="text-center py-12">
           <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
           <p className="text-[#6B7280]">暂无匹配的任务</p>
@@ -263,15 +256,21 @@ export default function AIGigMarketplace() {
           <div className="space-y-4 pt-4">
             <div>
               <label className="block text-sm font-medium text-[#111827] mb-1.5">任务标题</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="简要描述任务内容"
+                value={postForm.title}
+                onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-[#111827] mb-1.5">任务类别</label>
-              <select className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400">
+              <select
+                value={postForm.category}
+                onChange={(e) => setPostForm({ ...postForm, category: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+              >
                 <option value="">选择类别</option>
                 <option value="ai-comic">AI漫剧制作</option>
                 <option value="video-edit">视频剪辑</option>
@@ -282,33 +281,50 @@ export default function AIGigMarketplace() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">预算范围</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="¥X,XXX - ¥X,XXX"
+                  value={postForm.budget}
+                  onChange={(e) => setPostForm({ ...postForm, budget: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">截止日期</label>
-                <input 
-                  type="date" 
+                <input
+                  type="date"
+                  value={postForm.deadline}
+                  onChange={(e) => setPostForm({ ...postForm, deadline: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
                 />
               </div>
             </div>
             <div>
+              <label className="block text-sm font-medium text-[#111827] mb-1.5">联系方式</label>
+              <input
+                type="text"
+                placeholder="手机号/微信/邮箱"
+                value={postForm.contact}
+                onChange={(e) => setPostForm({ ...postForm, contact: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-[#111827] mb-1.5">任务描述</label>
-              <textarea 
+              <textarea
                 rows={4}
                 placeholder="详细描述任务需求、交付标准..."
+                value={postForm.description}
+                onChange={(e) => setPostForm({ ...postForm, description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400 resize-none"
               />
             </div>
             <button
               onClick={handlePostOrder}
-              className="w-full btn-primary"
+              disabled={isSubmitting || !postForm.title.trim()}
+              className="w-full btn-primary disabled:opacity-50"
             >
-              发布任务
+              {isSubmitting ? '提交中...' : '发布任务'}
             </button>
           </div>
         </DialogContent>
@@ -370,7 +386,7 @@ export default function AIGigMarketplace() {
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-[#111827] mb-2">提交成功</h3>
-            <p className="text-sm text-[#6B7280]">您的订单需求已提交,将由工作人员联系您</p>
+            <p className="text-sm text-[#6B7280]">您的订单需求已提交，审核通过后将在需求广场展示</p>
             <button
               onClick={() => setShowSuccessMessage(false)}
               className="mt-6 w-full btn-primary"

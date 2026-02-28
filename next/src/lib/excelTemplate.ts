@@ -135,9 +135,52 @@ export const NEWS_TEMPLATE = {
   ],
 };
 
+// Demands 模板定义
+export const DEMANDS_TEMPLATE = {
+  headers: [
+    '标题*',
+    '分类',
+    '预算',
+    '截止日期',
+    '描述',
+    '技能要求',
+    '发布者*',
+    '发布日期',
+    '联系方式',
+    '状态',
+  ],
+  fields: [
+    'title',
+    'category',
+    'budget',
+    'deadline',
+    'description',
+    'requirements',
+    'postedBy',
+    'postedAt',
+    'contact',
+    'status',
+  ],
+  uniqueKey: 'title', // 去重字段
+  sampleData: [
+    {
+      title: '示例需求标题',
+      category: 'ai-dev',
+      budget: '¥10,000 - ¥20,000',
+      deadline: '2026-03-15',
+      description: '这是一个示例需求描述，请详细描述任务内容和交付标准',
+      requirements: '熟悉Python,有AI开发经验',
+      postedBy: '示例公司',
+      postedAt: '2026-02-28',
+      contact: '13800138000',
+      status: 'open',
+    },
+  ],
+};
+
 // 生成 Excel 模板
 export function generateTemplate(
-  templateType: 'communities' | 'events' | 'news'
+  templateType: 'communities' | 'events' | 'news' | 'demands'
 ): XLSX.WorkBook {
   let template;
   switch (templateType) {
@@ -149,6 +192,9 @@ export function generateTemplate(
       break;
     case 'news':
       template = NEWS_TEMPLATE;
+      break;
+    case 'demands':
+      template = DEMANDS_TEMPLATE;
       break;
   }
 
@@ -196,7 +242,7 @@ export function generateTemplate(
 
 // 下载模板
 export function downloadTemplate(
-  templateType: 'communities' | 'events' | 'news'
+  templateType: 'communities' | 'events' | 'news' | 'demands'
 ) {
   const wb = generateTemplate(templateType);
   const filename = `${templateType}_template_${Date.now()}.xlsx`;
@@ -206,7 +252,7 @@ export function downloadTemplate(
 // 解析上传的 Excel 文件
 export function parseExcelFile<T>(
   file: File,
-  templateType: 'communities' | 'events' | 'news'
+  templateType: 'communities' | 'events' | 'news' | 'demands'
 ): Promise<T[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -229,6 +275,9 @@ export function parseExcelFile<T>(
             break;
           case 'news':
             template = NEWS_TEMPLATE;
+            break;
+          case 'demands':
+            template = DEMANDS_TEMPLATE;
             break;
         }
 

@@ -31,7 +31,7 @@ const navItems = [
 
 export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarProps) {
   const pathname = usePathname();
-  const { isLoggedIn, user, openLoginModal, logout } = useAuth();
+  const { isLoggedIn, user, setShowLoginModal, logout } = useAuth();
 
   const getActiveId = () => {
     if (pathname === '/') return 'dashboard';
@@ -102,18 +102,20 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
         {/* Bottom Section */}
         <div className="p-4 border-t border-gray-100">
           {isLoggedIn && user ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center gap-3 px-3 py-2.5">
-                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.username} className="w-full h-full rounded-full object-cover" />
+                    <img src={user.avatar} alt={user.nickname || ''} className="w-full h-full object-cover" />
                   ) : (
                     <UserCircle className="w-5 h-5 text-gray-500" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#111827] truncate">{user.nickname || user.username}</p>
-                  <p className="text-xs text-[#9CA3AF] truncate">{user.email}</p>
+                  <p className="text-sm font-medium text-[#111827] truncate">{user.nickname || `用户${user.phone?.slice(-4)}`}</p>
+                  <p className="text-xs text-[#9CA3AF] truncate">
+                    {user.membershipType === 'pro' ? '专业版会员' : user.membershipType === 'enterprise' ? '企业版会员' : '免费版'}
+                  </p>
                 </div>
                 <div className="w-[3px] h-[3px] rounded-full bg-[#22C55E]" />
               </div>
@@ -125,13 +127,20 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
               </button>
             </div>
           ) : (
-            <button
-              onClick={openLoginModal}
-              className="w-full btn-primary"
-            >
-              <UserCircle className="w-4 h-4 mr-2" />
-              登录 / 注册
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="w-full h-10 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                登录
+              </button>
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="w-full h-10 border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                注册会员
+              </button>
+            </div>
           )}
         </div>
       </aside>

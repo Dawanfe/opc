@@ -22,7 +22,10 @@
       "Bash(./setup-china-mirrors.sh:*)",
       "Bash(./deploy.sh:*)",
       "Bash(sshpass -p \"GAA-lianmeng666\" ssh -o StrictHostKeyChecking=no root@101.200.231.179 'cat > /etc/docker/daemon.json << ''''EOF''''\n{\n  \"\"registry-mirrors\"\": [\n    \"\"https://dockerproxy.com\"\",\n    \"\"https://docker.nju.edu.cn\"\"\n  ],\n  \"\"log-driver\"\": \"\"json-file\"\",\n  \"\"log-opts\"\": {\n    \"\"max-size\"\": \"\"100m\"\",\n    \"\"max-file\"\": \"\"3\"\"\n  },\n  \"\"max-concurrent-downloads\"\": 10,\n  \"\"max-concurrent-uploads\"\": 10\n}\nEOF\nsystemctl daemon-reload\nsystemctl restart docker\nsleep 3\ndocker info | grep -A 5 \"\"Registry Mirrors\"\"')",
-      "Bash(sshpass:*)"
+      "Bash(sshpass:*)",
+      "Bash(bash deploy.sh:*)",
+      "Bash(bash:*)",
+      "Bash(npx next build:*)"
     ]
   }
 }

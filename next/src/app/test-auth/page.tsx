@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiUrl } from '@/lib/utils';
@@ -15,15 +14,16 @@ export default function TestAuthPage() {
     setLoading(true);
     setResult('Testing...');
 
+    const phone = `138${Date.now().toString().slice(-8)}`;
+
     try {
       const response = await fetch(apiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: 'testuser' + Date.now(),
-          email: `test${Date.now()}@example.com`,
+          phone,
           password: 'password123',
-          nickname: 'Test User',
+          nickname: '测试用户',
         }),
       });
 
@@ -46,14 +46,15 @@ export default function TestAuthPage() {
     setLoading(true);
     setResult('Testing login...');
 
+    const phone = `139${Date.now().toString().slice(-8)}`;
+
     try {
       // First register
       const regResponse = await fetch(apiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: 'logintest' + Date.now(),
-          email: `logintest${Date.now()}@example.com`,
+          phone,
           password: 'password123',
         }),
       });
@@ -66,7 +67,7 @@ export default function TestAuthPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username: regData.user.username,
+            phone,
             password: 'password123',
           }),
         });

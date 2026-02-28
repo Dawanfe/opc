@@ -27,7 +27,7 @@ interface PolicyItem {
 const cities = ['全部', '北京', '上海', '深圳', '杭州', '广州', '南京', '成都', '武汉', '厦门'];
 
 export default function PolicyWorkspace() {
-  const { isLoggedIn, openLoginModal } = useAuth();
+  const { isLoggedIn, setShowLoginModal } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('全部');
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyItem | null>(null);
@@ -293,7 +293,7 @@ export default function PolicyWorkspace() {
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
                         <button
-                          onClick={openLoginModal}
+                          onClick={() => setShowLoginModal(true)}
                           className="flex items-center gap-2 px-4 py-2 bg-[#111827] text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
                         >
                           <Lock className="w-4 h-4" />

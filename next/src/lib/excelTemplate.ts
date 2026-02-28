@@ -260,10 +260,10 @@ export function parseExcelFile<T>(
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+        const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
 
         let template;
         switch (templateType) {
@@ -281,6 +281,12 @@ export function parseExcelFile<T>(
             break;
         }
 
+        // 日期字段列表
+        const dateFields = new Set<string>();
+        if (templateType === 'events') dateFields.add('date');
+        if (templateType === 'news') dateFields.add('date');
+        if (templateType === 'demands') { dateFields.add('deadline'); dateFields.add('postedAt'); }
+
         // 跳过表头,解析数据
         const rows = jsonData.slice(1) as any[][];
         const parsed = rows
@@ -288,7 +294,16 @@ export function parseExcelFile<T>(
           .map(row => {
             const obj: any = {};
             template.fields.forEach((field, index) => {
-              obj[field] = row[index] !== undefined ? row[index] : '';
+              let value = row[index] !== undefined ? row[index] : '';
+              // 兜底：如果日期字段仍然是数字（Excel序列号），转换为 YYYY-MM-DD
+              if (dateFields.has(field) && typeof value === 'number' && value > 1000) {
+                const date = new Date((value - 25569) * 86400 * 1000);
+                const y = date.getUTCFullYear();
+                const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const d = String(date.getUTCDate()).padStart(2, '0');
+                value = `${y}-${m}-${d}`;
+              }
+              obj[field] = value;
             });
             return obj as T;
           });

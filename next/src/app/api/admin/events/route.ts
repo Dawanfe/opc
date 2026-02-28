@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
-// GET - 获取所有活动或单个活动
+// GET - 获取所有活动或单个活动（支持分页）
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
+  const page = searchParams.get('page');
+  const pageSize = parseInt(searchParams.get('pageSize') || '20');
 
   try {
     const db = getDb();
@@ -20,6 +22,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(event);
     }
 
+    // 分页模式
+    if (page) {
+      const pageNum = Math.max(1, parseInt(page));
+      const offset = (pageNum - 1) * pageSize;
+      const total = (db.prepare('SELECT COUNT(*) as count FROM events').get() as any).count;
+      const events = db.prepare('SELECT * FROM events ORDER BY date DESC, id DESC LIMIT ? OFFSET ?').all(pageSize, offset);
+      db.close();
+
+      return NextResponse.json({
+        items: events,
+        total,
+        page: pageNum,
+        pageSize,
+        hasMore: offset + pageSize < total,
+      });
+    }
+
+    // 不带分页参数：返回全部（兼容管理后台）
     const events = db.prepare('SELECT * FROM events ORDER BY id DESC').all();
     db.close();
 

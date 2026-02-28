@@ -47,7 +47,8 @@ echo "上传完成"
 
 # ===== [3/6] 清理服务器磁盘空间 =====
 echo "=== [3/6] 清理服务器磁盘空间 ==="
-remote "df -h / | tail -1 && docker image prune -af 2>/dev/null && docker builder prune -af 2>/dev/null && docker container prune -f 2>/dev/null; apt-get clean 2>/dev/null || yum clean all 2>/dev/null; journalctl --vacuum-size=50M 2>/dev/null; rm -rf /tmp/weopc-* 2>/dev/null; echo '清理完成:' && df -h / | tail -1"
+# 注意：只清理悬空镜像和已停止容器，保留构建缓存以加速后续构建
+remote "df -h / | tail -1 && docker image prune -f 2>/dev/null && docker container prune -f 2>/dev/null; apt-get clean 2>/dev/null || yum clean all 2>/dev/null; journalctl --vacuum-size=50M 2>/dev/null; rm -rf /tmp/weopc-* 2>/dev/null; echo '清理完成:' && df -h / | tail -1"
 
 # ===== [4/6] 配置 Docker 国内镜像源 =====
 echo "=== [4/6] 配置 Docker 国内镜像源 ==="
@@ -65,9 +66,9 @@ remote "cd ${DEPLOY_PATH} && tar xzf deploy.tar.gz && rm -f deploy.tar.gz && ech
 # 5c: 生成 .env
 remote "if [ ! -f ${DEPLOY_PATH}/.env ]; then echo \"JWT_SECRET=\$(openssl rand -hex 32)\" > ${DEPLOY_PATH}/.env && echo '.env已生成'; else echo '.env已存在'; fi"
 
-# 5d: 构建镜像（耗时较长）
+# 5d: 构建镜像（利用缓存加速）
 echo "--- 构建镜像 ---"
-$SSH_CMD -o ServerAliveInterval=30 ${SERVER_USER}@${SERVER_HOST} "cd ${DEPLOY_PATH} && docker compose build --no-cache"
+$SSH_CMD -o ServerAliveInterval=30 ${SERVER_USER}@${SERVER_HOST} "cd ${DEPLOY_PATH} && docker compose build"
 
 # 5e: 启动服务
 echo "--- 启动服务 ---"

@@ -57,6 +57,18 @@ export async function POST(request: NextRequest) {
       'SELECT id, phone, nickname, membershipType, createdAt FROM users WHERE id = ?'
     ).get(result.lastInsertRowid);
 
+    // 生成正态分布随机增量 [1.3, 10]，均值约4.5
+    const u1 = Math.random();
+    const u2 = Math.random();
+    const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    const rawIncrement = 4.5 + z * 1.8; // 均值4.5，标准差1.8
+    const increment = Math.min(10, Math.max(1.3, rawIncrement));
+
+    // 记录增量日志
+    db.prepare(
+      'INSERT INTO member_count_log (userId, increment) VALUES (?, ?)'
+    ).run(result.lastInsertRowid, increment);
+
     db.close();
 
     return NextResponse.json({

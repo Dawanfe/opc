@@ -1,6 +1,6 @@
 "use client";
 
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useMemo} from 'react';
 import {
   Building2,
   Zap,
@@ -11,29 +11,8 @@ import {Button} from '@/components/ui/button';
 import {apiUrl} from '@/lib/utils';
 import {useAuth} from '@/contexts/AuthContext';
 
-const features = [
-  {
-    title: '免费工位与政策红利',
-    desc: '覆盖全国39+ OPC社区，提供零成本办公空间和政策补贴',
-    icon: Building2,
-    color: 'green',
-  },
-  {
-    title: '算力支持与AI工具',
-    desc: '最高1000万算力券补贴，免费使用主流AI开发工具',
-    icon: Zap,
-    color: 'blue',
-  },
-  {
-    title: '订单市场与资源对接',
-    desc: '连接300+生态伙伴，获取AI漫剧、开发、设计等订单',
-    icon: Handshake,
-    color: 'orange',
-  },
-];
-
 // Animated Counter Component
-function AnimatedCounter({target, suffix = ''}: {target: number; suffix?: string;}) {
+function AnimatedCounter({target, suffix = ''}: {target: number; suffix?: string}) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -60,6 +39,51 @@ function AnimatedCounter({target, suffix = ''}: {target: number; suffix?: string
 
 export default function Dashboard() {
   const {setShowLoginModal} = useAuth();
+  const [memberCount, setMemberCount] = useState(5001);
+  const [cityCount, setCityCount] = useState(26);
+  const [communityCount, setCommunityCount] = useState(39);
+  const [partnerCount, setPartnerCount] = useState(300);
+
+  const features = useMemo(() => [
+    {
+      title: '免费工位与政策红利',
+      desc: `覆盖全国${communityCount}个OPC社区，提供零成本办公空间和政策补贴`,
+      icon: Building2,
+      color: 'green',
+    },
+    {
+      title: '算力支持与AI工具',
+      desc: '最高1000万算力券补贴，免费使用主流AI开发工具',
+      icon: Zap,
+      color: 'blue',
+    },
+    {
+      title: '订单市场与资源对接',
+      desc: `连接${partnerCount}+生态伙伴，获取AI漫剧、开发、设计等订单`,
+      icon: Handshake,
+      color: 'orange',
+    },
+  ], [communityCount, partnerCount]);
+
+  useEffect(() => {
+    // 获取会员数
+    fetch(apiUrl('/api/member-count'))
+      .then(res => res.json())
+      .then(data => {
+        if (data.displayCount) setMemberCount(data.displayCount);
+      })
+      .catch(() => {});
+
+    // 获取统计数据（城市数、社区数、生态伙伴数）
+    fetch(apiUrl('/api/stats'))
+      .then(res => res.json())
+      .then(data => {
+        if (data.cityCount) setCityCount(data.cityCount);
+        if (data.communityCount) setCommunityCount(data.communityCount);
+        if (data.partnerCount) setPartnerCount(data.partnerCount);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -94,25 +118,25 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-4xl mx-auto">
           <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-emerald-500 mb-1">
-              <AnimatedCounter target={26} suffix="+" />
+              <AnimatedCounter target={cityCount} />
             </div>
             <div className="text-sm text-gray-500">覆盖城市</div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-yellow-500 mb-1">
-              <AnimatedCounter target={39} suffix="+" />
+              <AnimatedCounter target={communityCount} />
             </div>
             <div className="text-sm text-gray-500">OPC社区</div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-pink-500 mb-1">
-              <AnimatedCounter target={5000} suffix="+" />
+              <AnimatedCounter target={memberCount} suffix="+" />
             </div>
             <div className="text-sm text-gray-500">OPC会员</div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-blue-500 mb-1">
-              <AnimatedCounter target={300} suffix="+" />
+              <AnimatedCounter target={partnerCount} suffix="+" />
             </div>
             <div className="text-sm text-gray-500">生态伙伴</div>
           </div>

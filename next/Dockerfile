@@ -76,7 +76,7 @@ COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 # Ensure data directory exists and is writable
-RUN mkdir -p /app/data && chown -R nextjs:nodejs /app
+RUN mkdir -p /app/data/uploads && chown -R nextjs:nodejs /app
 
 USER nextjs
 

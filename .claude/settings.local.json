@@ -28,7 +28,9 @@
       "Bash(npx next build:*)",
       "Bash(lsof:*)",
       "Bash(cat:*)",
-      "Bash(docker ps:*)"
+      "Bash(docker ps:*)",
+      "Bash(npx next lint:*)",
+      "Bash(npx eslint:*)"
     ]
   }
 }

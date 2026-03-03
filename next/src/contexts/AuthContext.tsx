@@ -5,10 +5,11 @@ import { apiUrl } from '@/lib/utils';
 
 interface User {
   id: number;
-  phone: string;
+  phone?: string;
   nickname?: string;
   avatar?: string;
   membershipType: 'free' | 'pro' | 'enterprise';
+  wechatOpenId?: string;
 }
 
 interface AuthContextType {
@@ -16,6 +17,8 @@ interface AuthContextType {
   user: User | null;
   login: (phone: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (phone: string, password: string, nickname?: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithWechat: () => Promise<void>;
+  handleWechatCallback: () => boolean;
   logout: () => void;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
@@ -112,6 +115,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isLoggedIn]);
 
+  // 微信扫码登录 - 跳转到微信授权页面
+  const loginWithWechat = useCallback(async () => {
+    try {
+      const response = await fetch(apiUrl('/api/auth/wechat/qrcode'));
+      const data = await response.json();
+
+      if (data.success && data.data.qrcodeUrl) {
+        // 跳转到微信授权页面
+        window.location.href = data.data.qrcodeUrl;
+      } else {
+        console.error('获取微信登录二维码失败:', data.error);
+      }
+    } catch (error) {
+      console.error('微信登录请求失败:', error);
+    }
+  }, []);
+
+  // 处理微信登录回调（页面加载时检查 URL 参数）
+  const handleWechatCallback = useCallback((): boolean => {
+    if (typeof window === 'undefined') return false;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const wechatLogin = urlParams.get('wechat_login');
+
+    if (wechatLogin === 'success') {
+      const token = urlParams.get('token');
+      const userStr = urlParams.get('user');
+
+      if (token && userStr) {
+        try {
+          const userData = JSON.parse(userStr);
+          localStorage.setItem('user_token', token);
+          localStorage.setItem('user_data', JSON.stringify(userData));
+          setUser(userData);
+          setIsLoggedIn(true);
+          setShowLoginModal(false);
+
+          // 清理 URL 参数
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, '', cleanUrl);
+          return true;
+        } catch (e) {
+          console.error('解析微信登录用户数据失败:', e);
+        }
+      }
+    } else if (wechatLogin === 'error') {
+      const message = urlParams.get('message');
+      console.error('微信登录失败:', message);
+      // 清理 URL 参数
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    } else if (wechatLogin === 'cancelled') {
+      // 用户取消了登录
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
+
+    return false;
+  }, []);
+
+  // 检查微信登录回调
+  useEffect(() => {
+    handleWechatCallback();
+  }, [handleWechatCallback]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -119,6 +187,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         login,
         register,
+        loginWithWechat,
+        handleWechatCallback,
         logout,
         showLoginModal,
         setShowLoginModal,

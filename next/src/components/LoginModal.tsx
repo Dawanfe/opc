@@ -1,10 +1,19 @@
 "use client";
 
 import { useState } from 'react';
-import { X, Smartphone, Lock, Check, Loader2, UserPlus } from 'lucide-react';
+import { X, Smartphone, Check, Loader2, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
+// 微信图标组件
+function WechatIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89a.506.506 0 0 1-.104-.003l-.003-.005zm-2.419 2.118c.534 0 .967.44.967.982a.976.976 0 0 1-.967.983.976.976 0 0 1-.968-.983c0-.542.433-.982.968-.982zm4.844 0c.535 0 .967.44.967.982a.976.976 0 0 1-.967.983.976.976 0 0 1-.968-.983c0-.542.433-.982.968-.982z"/>
+    </svg>
+  );
+}
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,7 +21,7 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'wechat'>('wechat');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,7 +29,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { login, register } = useAuth();
+  const { login, register, loginWithWechat } = useAuth();
 
   if (!isOpen) return null;
 
@@ -32,9 +41,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setError('');
   };
 
-  const handleTabSwitch = (tab: 'login' | 'register') => {
+  const handleTabSwitch = (tab: 'login' | 'register' | 'wechat') => {
     setActiveTab(tab);
     resetForm();
+  };
+
+  const handleWechatLogin = async () => {
+    setIsLoading(true);
+    await loginWithWechat();
+    // 注意：loginWithWechat 会跳转页面，所以这里不需要设置 isLoading = false
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -117,6 +132,20 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         <div className="px-8">
           <div className="flex border-b border-gray-100">
             <button
+              onClick={() => handleTabSwitch('wechat')}
+              className={`flex-1 pb-3 text-sm font-medium transition-colors relative ${
+                activeTab === 'wechat' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <WechatIcon className="w-4 h-4" />
+                微信登录
+              </span>
+              {activeTab === 'wechat' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07C160]" />
+              )}
+            </button>
+            <button
               onClick={() => handleTabSwitch('login')}
               className={`flex-1 pb-3 text-sm font-medium transition-colors relative ${
                 activeTab === 'login' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'
@@ -149,7 +178,39 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
         {/* Content */}
         <div className="p-8">
-          {activeTab === 'login' ? (
+          {activeTab === 'wechat' ? (
+            <div className="space-y-6">
+              {/* 微信扫码登录区域 */}
+              <div className="flex flex-col items-center justify-center py-4">
+                <div className="w-48 h-48 bg-gray-50 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-200 mb-4">
+                  <div className="text-center">
+                    <WechatIcon className="w-16 h-16 text-[#07C160] mx-auto mb-3" />
+                    <p className="text-sm text-gray-500">点击下方按钮</p>
+                    <p className="text-sm text-gray-500">跳转微信扫码</p>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleWechatLogin}
+                  disabled={isLoading}
+                  className="w-full h-12 bg-[#07C160] hover:bg-[#06AD56] text-white font-medium"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <WechatIcon className="w-5 h-5" />
+                      微信扫码登录
+                    </span>
+                  )}
+                </Button>
+
+                <p className="text-xs text-gray-400 text-center mt-4">
+                  使用微信扫一扫，安全快捷登录
+                </p>
+              </div>
+            </div>
+          ) : activeTab === 'login' ? (
             <form onSubmit={handleLogin} className="space-y-5">
               {/* Phone input */}
               <div>

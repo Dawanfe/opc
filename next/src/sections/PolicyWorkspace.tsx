@@ -90,8 +90,8 @@ export default function PolicyWorkspace() {
       </div>
 
       {/* Search & Filter */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative max-w-md">
+      <div className="flex flex-col gap-3">
+        <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
           <input
             type="text"
@@ -101,7 +101,7 @@ export default function PolicyWorkspace() {
             className="search-input"
           />
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {cities.map((city) => (
             <button
               key={city}
@@ -190,7 +190,7 @@ export default function PolicyWorkspace() {
 
       {/* Detail Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+        <DialogContent className="max-w-2xl w-[95vw] max-h-[90vh] overflow-y-auto p-0">
           {selectedPolicy && (
             <>
               <DialogHeader className="p-6 pb-4 border-b border-gray-100 sticky top-0 bg-white z-10">

@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       const insertStmt = db.prepare(`
         INSERT INTO demands (
           title, category, budget, deadline, description,
-          requirements, postedBy, postedAt, contact, status, auditStatus
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          requirements, postedBy, postedAt, contact, location, status, auditStatus
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       const insertMany = db.transaction((demandsList: any[]) => {
@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
             demand.postedBy || null,
             demand.postedAt || null,
             demand.contact || null,
+            demand.location || null,
             demand.status || 'open',
             'approved' // 管理员批量导入默认已审核
           );
@@ -81,8 +82,8 @@ export async function POST(request: NextRequest) {
     const result = db.prepare(`
       INSERT INTO demands (
         title, category, budget, deadline, description,
-        requirements, postedBy, postedAt, contact, status, auditStatus
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        requirements, postedBy, postedAt, contact, location, status, auditStatus
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       body.title,
       body.category || null,
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
       body.postedBy || null,
       body.postedAt || null,
       body.contact || null,
+      body.location || null,
       body.status || 'open',
       'approved' // 管理员新增默认已审核
     );
@@ -126,7 +128,7 @@ export async function PUT(request: NextRequest) {
       UPDATE demands
       SET title = ?, category = ?, budget = ?, deadline = ?,
           description = ?, requirements = ?, postedBy = ?, postedAt = ?,
-          contact = ?, status = ?, auditStatus = ?, rejectReason = ?,
+          contact = ?, location = ?, status = ?, auditStatus = ?, rejectReason = ?,
           updatedAt = CURRENT_TIMESTAMP
       WHERE id = ?
     `).run(
@@ -139,6 +141,7 @@ export async function PUT(request: NextRequest) {
       data.postedBy || null,
       data.postedAt || null,
       data.contact || null,
+      data.location || null,
       data.status || 'open',
       data.auditStatus || 'pending',
       data.rejectReason || null,

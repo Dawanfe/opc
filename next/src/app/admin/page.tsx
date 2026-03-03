@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Calendar, Newspaper, Briefcase, Users } from 'lucide-react';
+import { Database, Calendar, Newspaper, Briefcase, Users, BarChart3 } from 'lucide-react';
 
 export default function AdminPage() {
   return (
@@ -13,7 +13,7 @@ export default function AdminPage() {
         <p className="text-muted-foreground">管理OPC社区、活动、新闻、需求广场和用户数据</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card className="flex flex-col">
           <CardHeader className="flex-1">
             <div className="flex items-center space-x-2">
@@ -94,6 +94,23 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <Link href="/admin/users">
+              <Button className="w-full">进入管理</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader className="flex-1">
+            <div className="flex items-center space-x-2">
+              <BarChart3 className="w-8 h-8 text-primary" />
+              <CardTitle>会员数据统计</CardTitle>
+            </div>
+            <CardDescription>
+              查看OPC会员数据（真实数据与展示数据）、管理二维码
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/member-stats">
               <Button className="w-full">进入管理</Button>
             </Link>
           </CardContent>

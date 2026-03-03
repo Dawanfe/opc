@@ -50,6 +50,7 @@ interface Demand {
   postedBy: string;
   postedAt: string;
   contact: string;
+  location: string;
   status: string;
   auditStatus: string;
   rejectReason: string;
@@ -82,6 +83,7 @@ export default function DemandsPage() {
     postedBy: '',
     postedAt: '',
     contact: '',
+    location: '',
     status: 'open',
     auditStatus: 'approved',
     rejectReason: '',
@@ -361,6 +363,7 @@ export default function DemandsPage() {
               <TableHead>分类</TableHead>
               <TableHead>预算</TableHead>
               <TableHead>截止日期</TableHead>
+              <TableHead>地点</TableHead>
               <TableHead>发布者</TableHead>
               <TableHead>审核状态</TableHead>
               <TableHead className="text-right">操作</TableHead>
@@ -369,7 +372,7 @@ export default function DemandsPage() {
           <TableBody>
             {paginatedDemands.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={10} className="text-center py-10 text-muted-foreground">
                   暂无数据
                 </TableCell>
               </TableRow>
@@ -387,6 +390,7 @@ export default function DemandsPage() {
                   <TableCell>{getCategoryLabel(demand.category)}</TableCell>
                   <TableCell>{demand.budget || '-'}</TableCell>
                   <TableCell>{demand.deadline || '-'}</TableCell>
+                  <TableCell>{demand.location || '-'}</TableCell>
                   <TableCell>{demand.postedBy || '-'}</TableCell>
                   <TableCell>{getAuditStatusBadge(demand.auditStatus)}</TableCell>
                   <TableCell className="text-right">
@@ -555,6 +559,18 @@ export default function DemandsPage() {
                     placeholder="手机号/微信/邮箱"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>地点</Label>
+                  <Input
+                    value={currentDemand.location}
+                    onChange={(e) =>
+                      setCurrentDemand({ ...currentDemand, location: e.target.value })
+                    }
+                    placeholder="城市/远程"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>发布日期</Label>
                   <Input

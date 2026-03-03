@@ -199,7 +199,7 @@ export default function AIGigMarketplace() {
                       <span className={`px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(gig.category)}`}>
                         {getCategoryLabel(gig.category)}
                       </span>
-                      <span className="text-xs text-[#9CA3AF]">{gig.postedAt} 发布</span>
+                      <span className="text-xs text-[#9CA3AF]">{gig.postedAt}</span>
                     </div>
 
                     <h3 className="text-base font-medium text-[#111827] mb-2">
@@ -226,12 +226,12 @@ export default function AIGigMarketplace() {
                         <span className="font-medium truncate">{gig.deadline || '待定'}</span>
                       </span>
                       <span className="inline-flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-[#111827]">
-                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#3B82F6] flex-shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#959996] flex-shrink-0" />
                         <span className="text-[#6B7280] hidden sm:inline">地点</span>
                         <span className="font-medium truncate">{gig.postedBy || '未知'}</span>
                       </span>
                       <span className="inline-flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-[#111827]">
-                        <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B5CF6] flex-shrink-0" />
+                        <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#00bf63] flex-shrink-0" />
                         <span className="text-[#6B7280] hidden sm:inline">联系人</span>
                         <span className="font-medium truncate">{isLoggedIn ? (gig.contact || '暂无') : '登录查看'}</span>
                       </span>

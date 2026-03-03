@@ -93,17 +93,31 @@ export function initDb() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      phone TEXT UNIQUE NOT NULL,
+      phone TEXT UNIQUE,
       username TEXT,
       email TEXT,
-      password TEXT NOT NULL,
+      password TEXT,
       nickname TEXT,
       avatar TEXT,
       membershipType TEXT DEFAULT 'free',
+      wechatOpenId TEXT UNIQUE,
+      wechatUnionId TEXT,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // 兼容旧表：如果 users 表没有微信相关列，自动添加
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN wechatOpenId TEXT UNIQUE`);
+  } catch {
+    // 列已存在，忽略
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN wechatUnionId TEXT`);
+  } catch {
+    // 列已存在，忽略
+  }
 
   // 兼容旧表迁移：检测旧 schema（username NOT NULL、无 phone 列等）并重建表
   const userColumns = db.prepare("PRAGMA table_info(users)").all() as any[];
@@ -199,6 +213,32 @@ export function initDb() {
     });
 
     seedDemands();
+  }
+
+  // 创建 member_count_log 表（会员数增量日志）
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS member_count_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId INTEGER NOT NULL,
+      increment REAL NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 创建 settings 表（系统配置，如二维码图片等）
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 兼容旧表：如果 demands 表没有 location 列，自动添加
+  try {
+    db.exec(`ALTER TABLE demands ADD COLUMN location TEXT`);
+  } catch {
+    // 列已存在，忽略
   }
 
   db.close();

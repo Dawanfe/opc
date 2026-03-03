@@ -1,7 +1,9 @@
 "use client";
 
-import { User, Phone, Building2, Briefcase, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Phone, Building2, Briefcase, CheckCircle, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiUrl } from '@/lib/utils';
 
 const benefits = [
   { icon: Building2, title: '政策查询', desc: '全国OPC政策实时查询' },
@@ -9,6 +11,57 @@ const benefits = [
   { icon: Phone, title: '联系方式', desc: '解锁社区联系方式' },
   { icon: CheckCircle, title: '活动优先', desc: '活动报名优先通道' },
 ];
+
+function ContactUs() {
+  const [groupQr, setGroupQr] = useState('');
+  const [wechatQr, setWechatQr] = useState('');
+
+  useEffect(() => {
+    fetch(apiUrl('/api/admin/settings?keys=group_qr_url,wechat_qr_url'))
+      .then(res => res.json())
+      .then((data: any[]) => {
+        data.forEach(item => {
+          if (item.key === 'group_qr_url') setGroupQr(item.value || '');
+          if (item.key === 'wechat_qr_url') setWechatQr(item.value || '');
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <div>
+      <h2 className="text-title mb-4">联系我们</h2>
+      <div className="opc-card p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <MessageCircle className="w-5 h-5 text-[#22C55E]" />
+          <p className="text-sm font-medium text-[#111827]">添加微信加入WeOPC社群</p>
+        </div>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="text-center">
+            <div className="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden mb-2">
+              {groupQr ? (
+                <img src={groupQr} alt="群二维码" className="w-full h-full object-contain p-2" />
+              ) : (
+                <div className="text-xs text-[#9CA3AF]">群二维码</div>
+              )}
+            </div>
+            <p className="text-xs text-[#6B7280]">群二维码</p>
+          </div>
+          <div className="text-center">
+            <div className="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden mb-2">
+              {wechatQr ? (
+                <img src={wechatQr} alt="微信二维码" className="w-full h-full object-contain p-2" />
+              ) : (
+                <div className="text-xs text-[#9CA3AF]">微信二维码</div>
+              )}
+            </div>
+            <p className="text-xs text-[#6B7280]">微信二维码</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Profile() {
   const { isLoggedIn, user, setShowLoginModal } = useAuth();
@@ -75,6 +128,9 @@ export default function Profile() {
             })}
           </div>
         </div>
+
+        {/* Contact Us */}
+        <ContactUs />
       </div>
     );
   }
@@ -138,6 +194,8 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Contact Us */}
+      <ContactUs />
     </div>
   );
 }

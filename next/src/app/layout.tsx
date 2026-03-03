@@ -5,12 +5,14 @@ import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import AppShell from "@/components/AppShell";
 import { Toaster } from "sonner";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export const metadata: Metadata = {
   title: "WeOPC - 全国一站式OPC服务平台",
   description: "连接全国OPC社区资源，为AI时代的超级个体提供政策、工位、算力、投资一站式解决方案",
   icons: {
-    icon: "/ico.png",
-    apple: "/ico.png",
+    icon: `${basePath}/ico.png`,
+    apple: `${basePath}/ico.png`,
   },
 };
 

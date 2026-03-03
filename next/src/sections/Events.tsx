@@ -156,8 +156,7 @@ export default function Events() {
       {/* Scrollable container */}
       <div
         ref={scrollContainerRef}
-        className="relative overflow-y-auto -mx-1 px-1"
-        style={{ maxHeight: 'calc(100vh - 200px)' }}
+        className="relative -mx-1 px-1"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

@@ -3,17 +3,17 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Calendar, Newspaper, Briefcase } from 'lucide-react';
+import { Database, Calendar, Newspaper, Briefcase, Users } from 'lucide-react';
 
 export default function AdminPage() {
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">管理后台</h1>
-        <p className="text-muted-foreground">管理OPC社区、活动、新闻和需求广场数据</p>
+        <p className="text-muted-foreground">管理OPC社区、活动、新闻、需求广场和用户数据</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <Card className="flex flex-col">
           <CardHeader className="flex-1">
             <div className="flex items-center space-x-2">
@@ -81,6 +81,23 @@ export default function AdminPage() {
             </Link>
           </CardContent>
         </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader className="flex-1">
+            <div className="flex items-center space-x-2">
+              <Users className="w-8 h-8 text-primary" />
+              <CardTitle>用户管理</CardTitle>
+            </div>
+            <CardDescription>
+              管理平台注册用户，查看会员信息
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/users">
+              <Button className="w-full">进入管理</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="mt-10">
@@ -102,6 +119,9 @@ export default function AdminPage() {
               </Link>
               <Link href="/admin/demands">
                 <Button variant="outline">新增需求</Button>
+              </Link>
+              <Link href="/admin/users">
+                <Button variant="outline">新增用户</Button>
               </Link>
             </div>
           </CardContent>

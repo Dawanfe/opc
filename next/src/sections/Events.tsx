@@ -145,8 +145,8 @@ export default function Events() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="section-title">AI社区活动</h2>
-          <p className="text-sm text-gray-500 mt-1">参加线上线下AI活动,认识更多同道中人,获取最新行业资讯</p>
+          <h1 className="text-display mb-1">AI社区活动</h1>
+          <p className="text-body">参加线上线下AI活动,认识更多同道中人,获取最新行业资讯</p>
         </div>
         {total > 0 && (
           <span className="text-xs text-gray-400">共 {total} 个活动</span>

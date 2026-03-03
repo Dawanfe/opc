@@ -105,6 +105,54 @@ export function initDb() {
     )
   `);
 
+  // 兼容旧表迁移：检测旧 schema（username NOT NULL、无 phone 列等）并重建表
+  const userColumns = db.prepare("PRAGMA table_info(users)").all() as any[];
+  const phoneCol = userColumns.find((col: any) => col.name === 'phone');
+  const usernameCol = userColumns.find((col: any) => col.name === 'username');
+  const needsMigration = !phoneCol || (usernameCol && usernameCol.notnull === 1);
+
+  if (needsMigration) {
+    db.exec('PRAGMA foreign_keys=off');
+    db.transaction(() => {
+      // 重命名旧表
+      db.exec('ALTER TABLE users RENAME TO users_old');
+      // 创建新表
+      db.exec(`
+        CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          phone TEXT UNIQUE,
+          username TEXT,
+          email TEXT,
+          password TEXT NOT NULL,
+          nickname TEXT,
+          avatar TEXT,
+          membershipType TEXT DEFAULT 'free',
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      // 迁移旧数据：用 username 或 email 填充 phone
+      const oldHasPhone = userColumns.some((col: any) => col.name === 'phone');
+      if (oldHasPhone) {
+        db.exec(`
+          INSERT INTO users (id, phone, username, email, password, nickname, avatar, membershipType, createdAt, updatedAt)
+          SELECT id, COALESCE(phone, username, email), username, email, password, nickname, avatar,
+                 COALESCE(membershipType, 'free'), createdAt, updatedAt
+          FROM users_old
+        `);
+      } else {
+        db.exec(`
+          INSERT INTO users (id, phone, username, email, password, nickname, avatar, membershipType, createdAt, updatedAt)
+          SELECT id, COALESCE(username, email), username, email, password, nickname, avatar,
+                 'free', createdAt, updatedAt
+          FROM users_old
+        `);
+      }
+      db.exec('DROP TABLE users_old');
+    })();
+    db.exec('PRAGMA foreign_keys=on');
+  }
+
   // 创建 Demands 表 (需求广场)
   db.exec(`
     CREATE TABLE IF NOT EXISTS demands (

@@ -269,9 +269,11 @@ export default function DemandsPage() {
 
   const getCategoryLabel = (category: string) => {
     const map: Record<string, string> = {
-      'ai-comic': 'AI漫剧制作',
+      'ai-dev': 'AI 应用与系统开发',
+      'ai-comic': 'AI 漫剧与短剧全案',
+      'aigc': 'AIGC图像与视频创作',
+      'ai-consult': 'AI 咨询、方案与企业内训',
       'video-edit': '视频剪辑',
-      'ai-dev': 'AI技术开发',
       'other': '其他',
     };
     return map[category] || category || '-';
@@ -504,10 +506,10 @@ export default function DemandsPage() {
                     }
                   >
                     <option value="">选择分类</option>
-                    <option value="ai-comic">AI漫剧制作</option>
-                    <option value="video-edit">视频剪辑</option>
-                    <option value="ai-dev">AI技术开发</option>
-                    <option value="other">其他</option>
+                    <option value="ai-dev">AI 应用与系统开发</option>
+                    <option value="ai-comic">AI 漫剧与短剧全案</option>
+                    <option value="aigc">AIGC图像与视频创作</option>
+                    <option value="ai-consult">AI 咨询、方案与企业内训</option>
                   </select>
                 </div>
                 <div className="space-y-2">

@@ -111,12 +111,12 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
                     <UserCircle className="w-5 h-5 text-gray-500" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#111827] truncate">{user.nickname || `用户${user.phone?.slice(-4)}`}</p>
+                <Link href="/profile" onClick={onMobileClose} className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[#111827] truncate hover:text-[#3B82F6] transition-colors">{user.nickname || `用户${user.phone?.slice(-4)}`}</p>
                   <p className="text-xs text-[#9CA3AF] truncate">
                     {user.membershipType === 'pro' ? '专业版会员' : user.membershipType === 'enterprise' ? '企业版会员' : '免费版'}
                   </p>
-                </div>
+                </Link>
                 <div className="w-[3px] h-[3px] rounded-full bg-[#22C55E]" />
               </div>
               <button

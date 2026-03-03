@@ -25,7 +25,10 @@
       "Bash(sshpass:*)",
       "Bash(bash deploy.sh:*)",
       "Bash(bash:*)",
-      "Bash(npx next build:*)"
+      "Bash(npx next build:*)",
+      "Bash(lsof:*)",
+      "Bash(cat:*)",
+      "Bash(docker ps:*)"
     ]
   }
 }

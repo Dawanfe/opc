@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, Plus, Clock, DollarSign, User, Briefcase, Wand2, Video, Code } from 'lucide-react';
+import { Search, Plus, Clock, MapPin, Phone, Briefcase, Wand2, Video, Code, MessageSquare } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiUrl } from '@/lib/utils';
@@ -9,22 +9,23 @@ import { apiUrl } from '@/lib/utils';
 interface Gig {
   id: number;
   title: string;
-  category: 'ai-comic' | 'video-edit' | 'ai-dev' | 'other';
+  category: string;
   budget: string;
   deadline: string;
   description: string;
   requirements: string;
   postedBy: string;
   postedAt: string;
+  contact: string;
   status: 'open' | 'in-progress' | 'completed';
 }
 
 const categories = [
   { id: 'all', label: '全部', icon: Briefcase },
-  { id: 'ai-comic', label: 'AI漫剧制作', icon: Wand2 },
-  { id: 'video-edit', label: '视频剪辑', icon: Video },
-  { id: 'ai-dev', label: 'AI技术开发', icon: Code },
-  { id: 'other', label: '其他', icon: Briefcase },
+  { id: 'ai-dev', label: 'AI 应用与系统开发', icon: Code },
+  { id: 'ai-comic', label: 'AI 漫剧与短剧全案', icon: Wand2 },
+  { id: 'aigc', label: 'AIGC图像与视频创作', icon: Video },
+  { id: 'ai-consult', label: 'AI 咨询与企业内训', icon: MessageSquare },
 ];
 
 export default function AIGigMarketplace() {
@@ -39,7 +40,6 @@ export default function AIGigMarketplace() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 发布订单表单状态
   const [postForm, setPostForm] = useState({
     title: '',
     category: '',
@@ -104,7 +104,7 @@ export default function AIGigMarketplace() {
         setPostForm({ title: '', category: '', budget: '', deadline: '', description: '', contact: '' });
       }
     } catch (error) {
-      console.error('发布订单失败:', error);
+      console.error('发布需求失败:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -115,9 +115,15 @@ export default function AIGigMarketplace() {
     return cat?.label || categoryId;
   };
 
-  const getRequirementsList = (requirements: string): string[] => {
-    if (!requirements) return [];
-    return requirements.split(',').map(r => r.trim()).filter(Boolean);
+  const getCategoryColor = (categoryId: string) => {
+    switch (categoryId) {
+      case 'ai-dev': return 'bg-[#22C55E]/10 text-[#22C55E]';
+      case 'ai-comic': return 'bg-[#EC4899]/10 text-[#EC4899]';
+      case 'aigc': return 'bg-[#8B5CF6]/10 text-[#8B5CF6]';
+      case 'ai-consult': return 'bg-[#F59E0B]/10 text-[#F59E0B]';
+      case 'video-edit': return 'bg-[#3B82F6]/10 text-[#3B82F6]';
+      default: return 'bg-gray-100 text-[#6B7280]';
+    }
   };
 
   return (
@@ -125,15 +131,15 @@ export default function AIGigMarketplace() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-display mb-1">订单市场</h1>
-          <p className="text-body">发布订单或承接任务,优先找到AI时代新机遇</p>
+          <h1 className="text-display mb-1">需求市场</h1>
+          <p className="text-body">发布需求或承接任务,优先找到AI时代新机遇</p>
         </div>
         <button
           onClick={() => isLoggedIn ? setIsPostModalOpen(true) : setShowLoginModal(true)}
-          className="btn-primary"
+          className="btn-primary whitespace-nowrap"
         >
           <Plus className="w-4 h-4 mr-2" />
-          发布订单
+          发布需求
         </button>
       </div>
 
@@ -149,7 +155,7 @@ export default function AIGigMarketplace() {
             className="search-input"
           />
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex flex-wrap items-center gap-2">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -157,14 +163,14 @@ export default function AIGigMarketplace() {
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`
-                  flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-150
+                  flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-150
                   ${selectedCategory === cat.id
                     ? 'bg-[#111827] text-white'
                     : 'bg-gray-100 text-[#6B7280] hover:bg-gray-200'
                   }
                 `}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4 h-4 flex-shrink-0" />
                 {cat.label}
               </button>
             );
@@ -185,18 +191,12 @@ export default function AIGigMarketplace() {
           {filteredGigs.map((gig) => (
               <div
                 key={gig.id}
-                className="opc-card p-5 hover:border-gray-200 transition-all duration-150"
+                className="opc-card p-4 sm:p-5 hover:border-gray-200 transition-all duration-150"
               >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`
-                        px-2 py-0.5 rounded text-xs font-medium
-                        ${gig.category === 'ai-comic' ? 'bg-[#EC4899]/10 text-[#EC4899]' : ''}
-                        ${gig.category === 'video-edit' ? 'bg-[#3B82F6]/10 text-[#3B82F6]' : ''}
-                        ${gig.category === 'ai-dev' ? 'bg-[#22C55E]/10 text-[#22C55E]' : ''}
-                        ${gig.category === 'other' ? 'bg-gray-100 text-[#6B7280]' : ''}
-                      `}>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(gig.category)}`}>
                         {getCategoryLabel(gig.category)}
                       </span>
                       <span className="text-xs text-[#9CA3AF]">{gig.postedAt} 发布</span>
@@ -209,29 +209,41 @@ export default function AIGigMarketplace() {
                     <p className="text-sm text-[#6B7280] line-clamp-2 mb-3">
                       {gig.description}
                     </p>
-
-                    <div className="flex flex-wrap items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1.5 text-[#111827]">
-                        <DollarSign className="w-4 h-4 text-[#22C55E]" />
-                        <span className="font-medium">{gig.budget}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[#6B7280]">
-                        <Clock className="w-4 h-4 text-[#9CA3AF]" />
-                        <span>截止 {gig.deadline}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[#6B7280]">
-                        <User className="w-4 h-4 text-[#9CA3AF]" />
-                        <span>{gig.postedBy}</span>
-                      </div>
-                    </div>
                   </div>
 
-                  <button
-                    onClick={() => handleApply(gig)}
-                    className="btn-primary whitespace-nowrap"
-                  >
-                    我要接单
-                  </button>
+                  {/* Bottom: info items + action button */}
+                  <div className="space-y-3">
+                    {/* Info Grid - 2x2 on mobile, inline on desktop */}
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 sm:gap-x-4 sm:gap-y-2">
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-[#111827]">
+                        <img src={apiUrl("/price.png")} alt="价格" className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="text-[#6B7280] hidden sm:inline">价格</span>
+                        <span className="font-medium truncate">{gig.budget || '面议'}</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-[#111827]">
+                        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F59E0B] flex-shrink-0" />
+                        <span className="text-[#6B7280] hidden sm:inline">截止</span>
+                        <span className="font-medium truncate">{gig.deadline || '待定'}</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-[#111827]">
+                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#3B82F6] flex-shrink-0" />
+                        <span className="text-[#6B7280] hidden sm:inline">地点</span>
+                        <span className="font-medium truncate">{gig.postedBy || '未知'}</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-[#111827]">
+                        <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B5CF6] flex-shrink-0" />
+                        <span className="text-[#6B7280] hidden sm:inline">联系人</span>
+                        <span className="font-medium truncate">{isLoggedIn ? (gig.contact || '暂无') : '登录查看'}</span>
+                      </span>
+                    </div>
+                    {/* Action Button - full width on mobile */}
+                    <button
+                      onClick={() => handleApply(gig)}
+                      className="w-full sm:w-auto sm:ml-auto btn-primary text-xs sm:text-sm px-4 py-2 whitespace-nowrap"
+                    >
+                      我要接单
+                    </button>
+                  </div>
                 </div>
               </div>
           ))}
@@ -249,9 +261,9 @@ export default function AIGigMarketplace() {
 
       {/* Post Gig Modal */}
       <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[#111827]">发布订单</DialogTitle>
+            <DialogTitle className="text-lg font-semibold text-[#111827]">发布需求</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div>
@@ -261,7 +273,7 @@ export default function AIGigMarketplace() {
                 placeholder="简要描述任务内容"
                 value={postForm.title}
                 onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
               />
             </div>
             <div>
@@ -269,16 +281,16 @@ export default function AIGigMarketplace() {
               <select
                 value={postForm.category}
                 onChange={(e) => setPostForm({ ...postForm, category: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
               >
                 <option value="">选择类别</option>
-                <option value="ai-comic">AI漫剧制作</option>
-                <option value="video-edit">视频剪辑</option>
-                <option value="ai-dev">AI技术开发</option>
-                <option value="other">其他</option>
+                <option value="ai-dev">AI 应用与系统开发</option>
+                <option value="ai-comic">AI 漫剧与短剧全案</option>
+                <option value="aigc">AIGC图像与视频创作</option>
+                <option value="ai-consult">AI 咨询、方案与企业内训</option>
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">预算范围</label>
                 <input
@@ -286,7 +298,7 @@ export default function AIGigMarketplace() {
                   placeholder="¥X,XXX - ¥X,XXX"
                   value={postForm.budget}
                   onChange={(e) => setPostForm({ ...postForm, budget: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div>
@@ -295,7 +307,7 @@ export default function AIGigMarketplace() {
                   type="date"
                   value={postForm.deadline}
                   onChange={(e) => setPostForm({ ...postForm, deadline: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
                 />
               </div>
             </div>
@@ -306,7 +318,7 @@ export default function AIGigMarketplace() {
                 placeholder="手机号/微信/邮箱"
                 value={postForm.contact}
                 onChange={(e) => setPostForm({ ...postForm, contact: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
               />
             </div>
             <div>
@@ -316,13 +328,13 @@ export default function AIGigMarketplace() {
                 placeholder="详细描述任务需求、交付标准..."
                 value={postForm.description}
                 onChange={(e) => setPostForm({ ...postForm, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400 resize-none"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400 resize-none"
               />
             </div>
             <button
               onClick={handlePostOrder}
               disabled={isSubmitting || !postForm.title.trim()}
-              className="w-full btn-primary disabled:opacity-50"
+              className="w-full btn-primary py-3 disabled:opacity-50"
             >
               {isSubmitting ? '提交中...' : '发布任务'}
             </button>
@@ -332,22 +344,22 @@ export default function AIGigMarketplace() {
 
       {/* Apply Modal */}
       <Dialog open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-[#111827]">申请接单</DialogTitle>
           </DialogHeader>
           {selectedGig && (
             <div className="space-y-4 pt-4">
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
                 <p className="text-sm font-medium text-[#111827] mb-1">{selectedGig.title}</p>
-                <p className="text-sm text-[#6B7280]">{selectedGig.budget} · 截止 {selectedGig.deadline}</p>
+                <p className="text-xs sm:text-sm text-[#6B7280]">{selectedGig.budget} · 截止 {selectedGig.deadline}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">自我介绍</label>
                 <textarea
                   rows={3}
                   placeholder="简要介绍您的相关经验和优势..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400 resize-none"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400 resize-none"
                 />
               </div>
               <div>
@@ -355,19 +367,19 @@ export default function AIGigMarketplace() {
                 <input
                   type="text"
                   placeholder="您的报价金额"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">预计交付时间</label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
                 />
               </div>
               <button
                 onClick={() => setIsApplyModalOpen(false)}
-                className="w-full btn-primary"
+                className="w-full btn-primary py-3"
               >
                 提交申请
               </button>
@@ -378,18 +390,18 @@ export default function AIGigMarketplace() {
 
       {/* Success Message Modal */}
       <Dialog open={showSuccessMessage} onOpenChange={setShowSuccessMessage}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md mx-4 sm:mx-auto">
           <div className="text-center py-4">
-            <div className="w-16 h-16 rounded-full bg-[#22C55E]/10 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-[#22C55E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#22C55E]/10 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-[#22C55E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-[#111827] mb-2">提交成功</h3>
-            <p className="text-sm text-[#6B7280]">您的订单需求已提交，审核通过后将在需求广场展示</p>
+            <p className="text-sm text-[#6B7280]">您的需求已提交，审核通过后将在需求市场展示</p>
             <button
               onClick={() => setShowSuccessMessage(false)}
-              className="mt-6 w-full btn-primary"
+              className="mt-6 w-full btn-primary py-3"
             >
               知道了
             </button>

@@ -134,7 +134,7 @@ export default function PolicyWorkspace() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium text-[#6B7280]">
-                    {policy.city}
+                    {policy.district ? `${policy.city}·${policy.district}` : policy.city}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -293,7 +293,10 @@ export default function PolicyWorkspace() {
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
                         <button
-                          onClick={() => setShowLoginModal(true)}
+                          onClick={() => {
+                            setIsModalOpen(false);
+                            setShowLoginModal(true);
+                          }}
                           className="flex items-center gap-2 px-4 py-2 bg-[#111827] text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
                         >
                           <Lock className="w-4 h-4" />

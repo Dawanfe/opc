@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from 'react';
-import { User, Mail, Phone, Building2, Briefcase, CheckCircle, Edit2, Save } from 'lucide-react';
+import { User, Phone, Building2, Briefcase, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const benefits = [
@@ -13,7 +12,6 @@ const benefits = [
 
 export default function Profile() {
   const { isLoggedIn, user, setShowLoginModal } = useAuth();
-  const [isEditMode, setIsEditMode] = useState(false);
 
   if (!isLoggedIn) {
     return (
@@ -85,27 +83,9 @@ export default function Profile() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-display mb-1">会员中心</h1>
-          <p className="text-body">管理您的会员信息和权益</p>
-        </div>
-        <button
-          onClick={() => setIsEditMode(!isEditMode)}
-          className="btn-secondary"
-        >
-          {isEditMode ? (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              保存
-            </>
-          ) : (
-            <>
-              <Edit2 className="w-4 h-4 mr-2" />
-              编辑
-            </>
-          )}
-        </button>
+      <div>
+        <h1 className="text-display mb-1">会员中心</h1>
+        <p className="text-body">管理您的会员信息和权益</p>
       </div>
 
       {/* Profile Card */}
@@ -158,30 +138,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Activity History */}
-      <div>
-        <h2 className="text-title mb-4">最近活动</h2>
-        <div className="opc-card">
-          <div className="space-y-4">
-            {[
-              { action: '浏览了政策', target: '张江AI小镇 OPC孵化中心', time: '2小时前' },
-              { action: '收藏了社区', target: '微软加速器 (上海)', time: '1天前' },
-              { action: '报名了活动', target: '极客公园大会主舞台', time: '2天前' },
-            ].map((item, index) => (
-              <div key={index} className="flex items-center justify-between py-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-[#3B82F6]" />
-                  <div>
-                    <p className="text-sm text-[#111827]">{item.action}</p>
-                    <p className="text-xs text-[#6B7280]">{item.target}</p>
-                  </div>
-                </div>
-                <span className="text-xs text-[#9CA3AF]">{item.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

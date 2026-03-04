@@ -35,7 +35,7 @@ COPY scripts ./scripts
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV BASE_PATH=/weopc
+# ENV BASE_PATH=/weopc
 
 # 合并 build + esbuild 为一个 RUN，减少层数
 RUN npm run build && \

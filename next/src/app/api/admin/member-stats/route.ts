@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
-const BASE_COUNT = 5000;
+const BASE_COUNT = 5001;
 
 // GET - 获取会员统计数据（管理后台用）
 export async function GET() {

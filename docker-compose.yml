@@ -9,13 +9,16 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
-      - BASE_PATH=/weopc
       - JWT_SECRET=${JWT_SECRET:-change-this-secret-in-production}
+      - WECHAT_APP_ID=${WECHAT_APP_ID:-}
+      - WECHAT_APP_SECRET=${WECHAT_APP_SECRET:-}
+      - WECHAT_REDIRECT_URI=${WECHAT_REDIRECT_URI:-https://weopc.com.cn/api/auth/wechat/callback}
+      - NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL:-https://weopc.com.cn}
       - TZ=Asia/Shanghai
     volumes:
       - weopc-data:/app/data
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/weopc"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3

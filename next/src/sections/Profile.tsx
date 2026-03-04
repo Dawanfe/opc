@@ -36,26 +36,24 @@ function ContactUs() {
           <MessageCircle className="w-5 h-5 text-[#22C55E]" />
           <p className="text-sm font-medium text-[#111827]">添加微信加入WeOPC社群</p>
         </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="text-center">
-            <div className="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden mb-2">
+        <div className="flex gap-6">
+          <div>
+            <div className="w-[200px] h-[200px] bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden">
               {groupQr ? (
                 <img src={groupQr} alt="群二维码" className="w-full h-full object-contain p-2" />
               ) : (
                 <div className="text-xs text-[#9CA3AF]">群二维码</div>
               )}
             </div>
-            <p className="text-xs text-[#6B7280]">群二维码</p>
           </div>
-          <div className="text-center">
-            <div className="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden mb-2">
+          <div>
+            <div className="w-[200px] h-[200px] bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden">
               {wechatQr ? (
                 <img src={wechatQr} alt="微信二维码" className="w-full h-full object-contain p-2" />
               ) : (
                 <div className="text-xs text-[#9CA3AF]">微信二维码</div>
               )}
             </div>
-            <p className="text-xs text-[#6B7280]">微信二维码</p>
           </div>
         </div>
       </div>

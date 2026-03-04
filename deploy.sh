@@ -63,8 +63,15 @@ remote "mkdir -p ${DEPLOY_PATH}/db-backups; VOLUME_PATH=\$(docker volume inspect
 # 5b: 解压代码
 remote "cd ${DEPLOY_PATH} && tar xzf deploy.tar.gz && rm -f deploy.tar.gz && echo '代码解压完成'"
 
-# 5c: 生成 .env
-remote "if [ ! -f ${DEPLOY_PATH}/.env ]; then echo \"JWT_SECRET=\$(openssl rand -hex 32)\" > ${DEPLOY_PATH}/.env && echo '.env已生成'; else echo '.env已存在'; fi"
+# 5c: 生成/更新 .env
+remote "cat > ${DEPLOY_PATH}/.env << 'ENVEOF'
+JWT_SECRET=weopc-jwt-secret-key-2024-secure
+WECHAT_APP_ID=wx8167c84013a42a52
+WECHAT_APP_SECRET=gh_d3ac4db97652
+WECHAT_REDIRECT_URI=https://weopc.com.cn/api/auth/wechat/callback
+NEXT_PUBLIC_FRONTEND_URL=https://weopc.com.cn
+ENVEOF
+echo '.env已更新'"
 
 # 5d: 构建镜像（利用缓存加速）
 echo "--- 构建镜像 ---"
@@ -85,14 +92,14 @@ for i in $(seq 1 12); do
     echo ""
     echo "========================================="
     echo "  部署成功！服务已正常运行"
-    echo "  访问地址: https://globalaialumni.com/weopc"
+    echo "  访问地址: https://weopc.com.cn"
     echo "========================================="
     echo ""
     echo "容器状态:"
     echo "$STATUS"
     echo ""
     echo "--- API 测试 ---"
-    remote "curl -sI http://127.0.0.1:3001/weopc/api/admin/events 2>/dev/null | head -5"
+    remote "curl -sI http://127.0.0.1:3001/api/admin/events 2>/dev/null | head -5"
     echo ""
     echo "=== 部署完成 ==="
     exit 0

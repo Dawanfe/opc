@@ -101,13 +101,13 @@ export default function PolicyWorkspace() {
             className="search-input"
           />
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex flex-wrap items-center gap-2">
           {cities.map((city) => (
             <button
               key={city}
               onClick={() => setSelectedCity(city)}
               className={`
-                px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-150
+                px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150
                 ${selectedCity === city
                   ? 'bg-[#111827] text-white'
                   : 'bg-gray-100 text-[#6B7280] hover:bg-gray-200'
@@ -161,27 +161,27 @@ export default function PolicyWorkspace() {
               </p>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   {policy.freeWorkspace && policy.freeWorkspace !== '未明确提及' && policy.freeWorkspace !== '否' && (
                     <div className="flex items-center gap-1 text-xs text-[#6B7280]">
-                      <Building2 className="w-3.5 h-3.5 text-[#22C55E]" />
-                      <span>免费工位</span>
+                      <Building2 className="w-3.5 h-3.5 text-[#22C55E] flex-shrink-0" />
+                      <span className="whitespace-nowrap">免费工位</span>
                     </div>
                   )}
                   {policy.computingSupport && policy.computingSupport !== '未明确提及' && policy.computingSupport !== '否' && (
                     <div className="flex items-center gap-1 text-xs text-[#6B7280]">
-                      <Cpu className="w-3.5 h-3.5 text-[#3B82F6]" />
-                      <span>算力支持</span>
+                      <Cpu className="w-3.5 h-3.5 text-[#3B82F6] flex-shrink-0" />
+                      <span className="whitespace-nowrap">算力支持</span>
                     </div>
                   )}
                   {policy.investmentSupport && policy.investmentSupport !== '未明确提及' && policy.investmentSupport !== '否' && (
                     <div className="flex items-center gap-1 text-xs text-[#6B7280]">
-                      <Briefcase className="w-3.5 h-3.5 text-[#F97316]" />
-                      <span>创业投资</span>
+                      <Briefcase className="w-3.5 h-3.5 text-[#F97316] flex-shrink-0" />
+                      <span className="whitespace-nowrap">创业投资</span>
                     </div>
                   )}
                 </div>
-                <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#111827] transition-colors" />
+                <ChevronRight className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#111827] transition-colors flex-shrink-0" />
               </div>
             </div>
           );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Smartphone, Check, Loader2, UserPlus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -46,10 +46,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     resetForm();
   };
 
-  const handleWechatLogin = async () => {
-    setIsLoading(true);
-    await loginWithWechat();
-    // 注意：loginWithWechat 会跳转页面，所以这里不需要设置 isLoading = false
+  const handleWechatLogin = () => {
+    // 在当前窗口直接跳转到微信授权页面
+    loginWithWechat();
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -182,31 +181,26 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <div className="space-y-6">
               {/* 微信扫码登录区域 */}
               <div className="flex flex-col items-center justify-center py-4">
-                <div className="w-48 h-48 bg-gray-50 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-200 mb-4">
-                  <div className="text-center">
-                    <WechatIcon className="w-16 h-16 text-[#07C160] mx-auto mb-3" />
-                    <p className="text-sm text-gray-500">点击下方按钮</p>
-                    <p className="text-sm text-gray-500">跳转微信扫码</p>
-                  </div>
+                <div className="w-48 h-48 bg-gradient-to-br from-[#07C160]/10 to-[#07C160]/5 rounded-xl flex items-center justify-center mb-4">
+                  <WechatIcon className="w-24 h-24 text-[#07C160]" />
                 </div>
 
                 <Button
                   onClick={handleWechatLogin}
-                  disabled={isLoading}
                   className="w-full h-12 bg-[#07C160] hover:bg-[#06AD56] text-white font-medium"
                 >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <WechatIcon className="w-5 h-5" />
-                      微信扫码登录
-                    </span>
-                  )}
+                  <span className="flex items-center gap-2">
+                    <WechatIcon className="w-5 h-5" />
+                    微信扫码登录
+                  </span>
                 </Button>
 
-                <p className="text-xs text-gray-400 text-center mt-4">
-                  使用微信扫一扫，安全快捷登录
+                <p className="text-sm text-gray-600 text-center mt-4">
+                  点击按钮跳转微信扫码授权登录
+                </p>
+
+                <p className="text-xs text-gray-400 text-center">
+                  安全便捷，无需记忆密码
                 </p>
               </div>
             </div>

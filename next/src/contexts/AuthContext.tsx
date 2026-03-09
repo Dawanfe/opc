@@ -117,19 +117,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 微信扫码登录 - 跳转到微信授权页面
   const loginWithWechat = useCallback(async () => {
-    try {
-      const response = await fetch(apiUrl('/api/auth/wechat/qrcode'));
-      const data = await response.json();
+    // 直接在当前页面跳转到微信授权页面
+    const redirectUri = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://weopc.com.cn';
+    const appId = process.env.NEXT_PUBLIC_WECHAT_APP_ID || 'wxb3330c77aa423d29';
+    const state = Math.random().toString(36).substring(7);
+    const wechatAuthUrl = `https://open.weixin.qq.com/connect/qrconnect?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}/api/auth/wechat/callback&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`;
 
-      if (data.success && data.data.qrcodeUrl) {
-        // 跳转到微信授权页面
-        window.location.href = data.data.qrcodeUrl;
-      } else {
-        console.error('获取微信登录二维码失败:', data.error);
-      }
-    } catch (error) {
-      console.error('微信登录请求失败:', error);
-    }
+    console.log('[WeChat Login] redirectUri:', redirectUri);
+    console.log('[WeChat Login] appId:', appId);
+    window.location.href = wechatAuthUrl;
   }, []);
 
   // 处理微信登录回调（页面加载时检查 URL 参数）
@@ -139,37 +135,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const urlParams = new URLSearchParams(window.location.search);
     const wechatLogin = urlParams.get('wechat_login');
 
+    console.log('[WeChat Callback] URL search params:', window.location.search);
+    console.log('[WeChat Callback] wechatLogin:', wechatLogin);
+
     if (wechatLogin === 'success') {
       const token = urlParams.get('token');
       const userStr = urlParams.get('user');
 
+      console.log('[WeChat Callback] token:', token?.substring(0, 20) + '...');
+      console.log('[WeChat Callback] userStr:', userStr?.substring(0, 50) + '...');
+
       if (token && userStr) {
         try {
           const userData = JSON.parse(userStr);
+          console.log('[WeChat Callback] userData parsed:', userData);
+
           localStorage.setItem('user_token', token);
           localStorage.setItem('user_data', JSON.stringify(userData));
+          console.log('[WeChat Callback] localStorage updated:', { token, userData });
+
           setUser(userData);
           setIsLoggedIn(true);
           setShowLoginModal(false);
+          console.log('[WeChat Callback] Login successful! isLoggedIn=true');
 
           // 清理 URL 参数
           const cleanUrl = window.location.pathname;
           window.history.replaceState({}, '', cleanUrl);
           return true;
         } catch (e) {
-          console.error('解析微信登录用户数据失败:', e);
+          console.error('[WeChat Callback] 解析微信登录用户数据失败:', e);
         }
+      } else {
+        console.error('[WeChat Callback] Missing token or userStr:', { token: !!token, userStr: !!userStr });
       }
     } else if (wechatLogin === 'error') {
       const message = urlParams.get('message');
-      console.error('微信登录失败:', message);
+      console.error('[WeChat Callback] 微信登录失败:', message);
       // 清理 URL 参数
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, '', cleanUrl);
     } else if (wechatLogin === 'cancelled') {
+      console.log('[WeChat Callback] 用户取消了登录');
       // 用户取消了登录
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, '', cleanUrl);
+    } else {
+      console.log('[WeChat Callback] No WeChat login params found');
     }
 
     return false;

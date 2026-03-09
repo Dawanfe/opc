@@ -66,10 +66,11 @@ remote "cd ${DEPLOY_PATH} && tar xzf deploy.tar.gz && rm -f deploy.tar.gz && ech
 # 5c: 生成/更新 .env
 remote "cat > ${DEPLOY_PATH}/.env << 'ENVEOF'
 JWT_SECRET=weopc-jwt-secret-key-2024-secure
-WECHAT_APP_ID=wx8167c84013a42a52
-WECHAT_APP_SECRET=gh_d3ac4db97652
+WECHAT_APP_ID=wxb3330c77aa423d29
+WECHAT_APP_SECRET=b00822b41733d0dad1d8697774080755
 WECHAT_REDIRECT_URI=https://weopc.com.cn/api/auth/wechat/callback
 NEXT_PUBLIC_FRONTEND_URL=https://weopc.com.cn
+NEXT_PUBLIC_WECHAT_APP_ID=wxb3330c77aa423d29
 ENVEOF
 echo '.env已更新'"
 

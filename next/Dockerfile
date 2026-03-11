@@ -1,5 +1,6 @@
 # Multi-stage build for Next.js application
-FROM node:20-alpine AS base
+# 使用国内镜像加速
+FROM docker.mirrors.ustc.edu.cn/library/node:20-alpine AS base
 
 # 配置 Alpine 阿里云镜像源 + 安装公共依赖（合并 RUN 减少层数）
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories

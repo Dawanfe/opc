@@ -50,7 +50,18 @@
       "Bash(jq)",
       "Bash(sqlite3 data/opc.db \"SELECT id, phone, nickname, inviteCode FROM users WHERE phone = ''19900000000'';\")",
       "Bash(sqlite3 data/opc.db \"UPDATE users SET inviteCode = NULL WHERE id = 1; SELECT id, phone, inviteCode FROM users WHERE id = 1;\")",
-      "Bash(sqlite3 data/opc.db \"UPDATE users SET inviteCode = NULL WHERE phone = ''19988888888''; SELECT id, phone, inviteCode FROM users WHERE phone = ''19988888888'';\")"
+      "Bash(sqlite3 data/opc.db \"UPDATE users SET inviteCode = NULL WHERE phone = ''19988888888''; SELECT id, phone, inviteCode FROM users WHERE phone = ''19988888888'';\")",
+      "Bash(git push origin main)",
+      "Bash(/Users/zhanglei/test/opc/deploy.sh:*)",
+      "Bash(git add next/Dockerfile)",
+      "Bash(git commit -m \"fix: 使用国内 Docker 镜像源解决拉取超时\")",
+      "Bash(git add next/Dockerfile pull-image.sh)",
+      "Bash(git commit -m \"fix: 恢复原始 Dockerfile，添加镜像拉取脚本\")",
+      "Bash(git add deploy.sh)",
+      "Bash(git commit -m \"feat: 增强部署脚本，自动处理 Docker 镜像拉取\")",
+      "Bash(git commit -m \"fix: 恢复完整的部署脚本（包含服务器配置）\")",
+      "Bash(git add -A)",
+      "Bash(git commit -m \"fix: 修复邀请统计 API URL 错误，添加管理后台入口\")"
     ]
   }
 }

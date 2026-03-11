@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Calendar, Newspaper, Briefcase, Users, BarChart3 } from 'lucide-react';
+import { Database, Calendar, Newspaper, Briefcase, Users, BarChart3, Gift } from 'lucide-react';
 
 export default function AdminPage() {
   return (
@@ -111,6 +111,23 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <Link href="/admin/member-stats">
+              <Button className="w-full">进入管理</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader className="flex-1">
+            <div className="flex items-center space-x-2">
+              <Gift className="w-8 h-8 text-primary" />
+              <CardTitle>邀请统计</CardTitle>
+            </div>
+            <CardDescription>
+              查看用户邀请数据、邀请排行榜和激活率统计
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/invite-stats">
               <Button className="w-full">进入管理</Button>
             </Link>
           </CardContent>

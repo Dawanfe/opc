@@ -92,7 +92,7 @@ export default function InviteStatsPage() {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
-      const response = await fetch(`${apiUrl}/api/admin/invite-stats?${params}`);
+      const response = await fetch(apiUrl(`/api/admin/invite-stats?${params}`));
       if (!response.ok) throw new Error('获取数据失败');
 
       const data = await response.json();

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { generateUniqueInviteCode } from '@/lib/utils/invite';
+import { generateInviteCode } from '@/lib/utils/invite';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -49,23 +49,42 @@ export async function POST(request: Request) {
         );
       }
 
-      // 生成新的邀请码
-      const newInviteCode = generateUniqueInviteCode();
+      // 生成唯一邀请码（在同一个数据库连接中）
+      let newInviteCode: string;
+      const maxRetries = 10;
+      let retries = 0;
 
-      // 更新数据库
-      db.prepare('UPDATE users SET inviteCode = ? WHERE id = ?').run(newInviteCode, userId);
+      while (retries < maxRetries) {
+        newInviteCode = generateInviteCode();
 
-      return NextResponse.json({
-        message: '邀请码生成成功',
-        inviteCode: newInviteCode
-      });
+        // 检查邀请码是否已存在
+        const existing = db.prepare('SELECT id FROM users WHERE inviteCode = ?').get(newInviteCode);
+
+        if (!existing) {
+          // 找到唯一邀请码，更新数据库
+          db.prepare('UPDATE users SET inviteCode = ? WHERE id = ?').run(newInviteCode, userId);
+
+          return NextResponse.json({
+            message: '邀请码生成成功',
+            inviteCode: newInviteCode
+          });
+        }
+
+        retries++;
+      }
+
+      // 如果重试次数用完还没找到唯一邀请码
+      return NextResponse.json(
+        { error: '生成邀请码失败，请稍后重试' },
+        { status: 500 }
+      );
     } finally {
       db.close();
     }
   } catch (error) {
     console.error('Generate invite code error:', error);
     return NextResponse.json(
-      { error: '生成邀请码失败' },
+      { error: '生成邀请码失败', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

@@ -26,10 +26,23 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nickname, setNickname] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const { login, register, loginWithWechat } = useAuth();
+
+  // 检查是否有待处理的邀请码
+  useEffect(() => {
+    if (isOpen) {
+      const pendingCode = localStorage.getItem('pendingInviteCode');
+      if (pendingCode) {
+        setInviteCode(pendingCode);
+        setActiveTab('register'); // 自动切换到注册标签
+        localStorage.removeItem('pendingInviteCode');
+      }
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -38,6 +51,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setPassword('');
     setConfirmPassword('');
     setNickname('');
+    setInviteCode('');
     setError('');
   };
 
@@ -90,7 +104,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setError('');
     setIsLoading(true);
 
-    const result = await register(phone, password, nickname || undefined);
+    const result = await register(phone, password, nickname || undefined, inviteCode || undefined);
     if (!result.success) {
       setError(result.error || '注册失败');
     } else {
@@ -313,10 +327,28 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleRegister(e)}
                   placeholder="请再次输入密码"
                   className="h-12 text-base focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
                 />
+              </div>
+
+              {/* Invite Code input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  邀请码（可选）
+                </label>
+                <Input
+                  type="text"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                  onKeyDown={(e) => e.key === 'Enter' && handleRegister(e)}
+                  placeholder="请输入邀请码（选填）"
+                  className="h-12 text-base focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 font-mono"
+                  maxLength={8}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  如果您有朋友的邀请码，可以在此填写
+                </p>
               </div>
 
               {/* Error message */}

@@ -7,7 +7,15 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "db:init": "tsx scripts/init-db.ts"
+    "db:init": "tsx scripts/init-db.ts",
+    "test": "tsx tests/invite-complete.test.ts",
+    "test:invite": "tsx tests/invite.test.ts",
+    "test:invite:perf": "tsx tests/invite-performance.test.ts",
+    "test:invite:all": "./test-invite.sh",
+    "test:complete": "tsx tests/invite-complete.test.ts",
+    "test:seed": "tsx scripts/seed-test-data.ts",
+    "test:register": "tsx tests/register-complete.test.ts",
+    "fix:invite-codes": "tsx scripts/fix-invite-codes.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

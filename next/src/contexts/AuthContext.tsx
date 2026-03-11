@@ -15,8 +15,9 @@ interface User {
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
+  token: string | null;
   login: (phone: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (phone: string, password: string, nickname?: string) => Promise<{ success: boolean; error?: string }>;
+  register: (phone: string, password: string, nickname?: string, inviteCode?: string) => Promise<{ success: boolean; error?: string }>;
   loginWithWechat: () => Promise<void>;
   handleWechatCallback: () => boolean;
   logout: () => void;
@@ -30,17 +31,19 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   // 初始化时检查 localStorage 中的 token
   useEffect(() => {
-    const token = localStorage.getItem('user_token');
+    const storedToken = localStorage.getItem('user_token');
     const storedUser = localStorage.getItem('user_data');
 
-    if (token && storedUser) {
+    if (storedToken && storedUser) {
       try {
         const userData = JSON.parse(storedUser);
         setUser(userData);
+        setToken(storedToken);
         setIsLoggedIn(true);
       } catch {
         localStorage.removeItem('user_token');
@@ -63,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('user_token', data.token);
         localStorage.setItem('user_data', JSON.stringify(data.user));
         setUser(data.user);
+        setToken(data.token);
         setIsLoggedIn(true);
         setShowLoginModal(false);
         return { success: true };
@@ -77,13 +81,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (
     phone: string,
     password: string,
-    nickname?: string
+    nickname?: string,
+    inviteCode?: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
       const response = await fetch(apiUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, password, nickname }),
+        body: JSON.stringify({ phone, password, nickname, inviteCode }),
       });
 
       const data = await response.json();
@@ -104,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user_token');
     localStorage.removeItem('user_data');
     setUser(null);
+    setToken(null);
     setIsLoggedIn(false);
   }, []);
 
@@ -197,6 +203,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         isLoggedIn,
         user,
+        token,
         login,
         register,
         loginWithWechat,

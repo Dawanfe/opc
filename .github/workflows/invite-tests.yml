@@ -1,0 +1,126 @@
+name: Invite Feature Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'next/src/lib/utils/invite.ts'
+      - 'next/src/app/api/auth/**'
+      - 'next/src/app/api/user/invite-info/**'
+      - 'next/src/app/api/admin/invite-stats/**'
+      - 'next/src/lib/db.ts'
+      - 'next/tests/**'
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+
+      - name: 设置 Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: next/package-lock.json
+
+      - name: 安装依赖
+        run: |
+          cd next
+          npm ci
+
+      - name: 初始化数据库
+        run: |
+          cd next
+          npm run db:init
+
+      - name: 启动开发服务器
+        run: |
+          cd next
+          npm run dev &
+          sleep 10
+        env:
+          NODE_ENV: test
+
+      - name: 运行完整测试套件
+        run: |
+          cd next
+          npm test
+        timeout-minutes: 5
+
+      - name: 运行性能测试
+        run: |
+          cd next
+          npm run test:invite:perf
+        timeout-minutes: 3
+
+      - name: 上传测试结果
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: |
+            next/data/
+            /tmp/next-dev.log
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          cache-dependency-path: next/package-lock.json
+
+      - name: 安装依赖
+        run: |
+          cd next
+          npm ci
+
+      - name: 运行 Lint
+        run: |
+          cd next
+          npm run lint
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          cache-dependency-path: next/package-lock.json
+
+      - name: 安装依赖
+        run: |
+          cd next
+          npm ci
+
+      - name: 构建项目
+        run: |
+          cd next
+          npm run build
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: next/.next

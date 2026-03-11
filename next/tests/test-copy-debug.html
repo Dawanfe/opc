@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>复制功能测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background: #22C55E;
+      color: white;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #16A34A;
+    }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 4px;
+    }
+    .code {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px;
+      background: #f8f8f8;
+      border: 2px dashed #22C55E;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>🧪 复制功能调试测试</h1>
+
+  <div class="test-section">
+    <h2>测试邀请码</h2>
+    <div class="code" id="inviteCode">ABC12345</div>
+
+    <button onclick="testClipboardAPI()">测试 Clipboard API</button>
+    <button onclick="testExecCommand()">测试 ExecCommand</button>
+    <button onclick="testFullCopy()">测试完整复制逻辑</button>
+
+    <div id="result1" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>测试邀请链接</h2>
+    <div class="code" id="inviteLink">http://localhost:3000/register?invite=ABC12345</div>
+
+    <button onclick="testLinkCopy()">复制邀请链接</button>
+
+    <div id="result2" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>环境检测</h2>
+    <div id="envInfo"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>粘贴测试区</h2>
+    <textarea id="pasteArea" placeholder="复制后在这里粘贴 (Ctrl+V / Cmd+V)" style="width: 100%; height: 100px; padding: 10px; font-size: 14px;"></textarea>
+  </div>
+
+  <script>
+    // 环境检测
+    window.addEventListener('DOMContentLoaded', () => {
+      const envInfo = document.getElementById('envInfo');
+      envInfo.innerHTML = `
+        <p><strong>浏览器信息：</strong></p>
+        <ul>
+          <li>User Agent: ${navigator.userAgent}</li>
+          <li>是否支持 navigator.clipboard: ${navigator.clipboard ? '✅ 是' : '❌ 否'}</li>
+          <li>是否支持 clipboard.writeText: ${navigator.clipboard?.writeText ? '✅ 是' : '❌ 否'}</li>
+          <li>是否 HTTPS: ${location.protocol === 'https:' ? '✅ 是' : '❌ 否'}</li>
+          <li>当前协议: ${location.protocol}</li>
+        </ul>
+      `;
+    });
+
+    // 显示结果
+    function showResult(elementId, message, isSuccess) {
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<span class="${isSuccess ? 'success' : 'error'}">${message}</span>`;
+      console.log(message);
+    }
+
+    // 测试 Clipboard API
+    async function testClipboardAPI() {
+      const code = document.getElementById('inviteCode').textContent;
+
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        showResult('result1', '❌ 浏览器不支持 Clipboard API', false);
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(code);
+        showResult('result1', '✅ Clipboard API 复制成功！请在下方粘贴区测试粘贴', true);
+      } catch (err) {
+        showResult('result1', `❌ Clipboard API 失败: ${err.message}`, false);
+        console.error('Clipboard API error:', err);
+      }
+    }
+
+    // 测试 ExecCommand
+    function testExecCommand() {
+      const code = document.getElementById('inviteCode').textContent;
+
+      const textArea = document.createElement('textarea');
+      textArea.value = code;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.width = '2em';
+      textArea.style.height = '2em';
+      textArea.style.padding = '0';
+      textArea.style.border = 'none';
+      textArea.style.outline = 'none';
+      textArea.style.boxShadow = 'none';
+      textArea.style.background = 'transparent';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        if (successful) {
+          showResult('result1', '✅ ExecCommand 复制成功！请在下方粘贴区测试粘贴', true);
+        } else {
+          showResult('result1', '❌ ExecCommand 返回 false', false);
+        }
+      } catch (err) {
+        document.body.removeChild(textArea);
+        showResult('result1', `❌ ExecCommand 失败: ${err.message}`, false);
+        console.error('ExecCommand error:', err);
+      }
+    }
+
+    // 测试完整复制逻辑（与实际代码相同）
+    function testFullCopy() {
+      const code = document.getElementById('inviteCode').textContent;
+
+      // 尝试使用现代 API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          showResult('result1', '✅ 完整逻辑（Clipboard API 路径）复制成功！', true);
+        }).catch(() => {
+          fallbackCopyTextToClipboard(code);
+        });
+      } else {
+        // 降级方案
+        fallbackCopyTextToClipboard(code);
+      }
+    }
+
+    // 降级复制方案（与实际代码相同）
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.width = '2em';
+      textArea.style.height = '2em';
+      textArea.style.padding = '0';
+      textArea.style.border = 'none';
+      textArea.style.outline = 'none';
+      textArea.style.boxShadow = 'none';
+      textArea.style.background = 'transparent';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showResult('result1', '✅ 完整逻辑（降级方案）复制成功！', true);
+        } else {
+          showResult('result1', '❌ 完整逻辑（降级方案）失败', false);
+        }
+      } catch (err) {
+        showResult('result1', `❌ 完整逻辑（降级方案）异常: ${err.message}`, false);
+      }
+
+      document.body.removeChild(textArea);
+    }
+
+    // 测试链接复制
+    function testLinkCopy() {
+      const link = document.getElementById('inviteLink').textContent;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(() => {
+          showResult('result2', '✅ 邀请链接复制成功！请在下方粘贴区测试粘贴', true);
+        }).catch((err) => {
+          showResult('result2', `❌ 链接复制失败: ${err.message}`, false);
+        });
+      } else {
+        fallbackCopyLink(link);
+      }
+    }
+
+    function fallbackCopyLink(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showResult('result2', '✅ 链接复制成功（降级方案）！', true);
+        } else {
+          showResult('result2', '❌ 链接复制失败（降级方案）', false);
+        }
+      } catch (err) {
+        showResult('result2', `❌ 链接复制异常: ${err.message}`, false);
+      }
+
+      document.body.removeChild(textArea);
+    }
+
+    // 监听粘贴事件
+    document.getElementById('pasteArea').addEventListener('paste', (e) => {
+      setTimeout(() => {
+        const pastedText = e.target.value;
+        if (pastedText) {
+          console.log('✅ 粘贴成功，内容:', pastedText);
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>

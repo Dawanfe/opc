@@ -33,7 +33,20 @@
       "Bash(npx eslint:*)",
       "Bash(ssh:*)",
       "Bash(openssl s_client:*)",
-      "Bash(openssl x509:*)"
+      "Bash(openssl x509:*)",
+      "Bash(npm rebuild better-sqlite3)",
+      "Bash(sqlite3 /Users/zhanglei/test/opc/next/data/opc.db \"PRAGMA table_info\\(users\\);\")",
+      "Bash(sqlite3 /Users/zhanglei/test/opc/next/data/opc.db:*)",
+      "Bash(npm test)",
+      "Bash(./test-all.sh)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(xargs kill -9)",
+      "Bash(open http://localhost:3000/tests/test-copy-debug.html)",
+      "Bash(sqlite3 data/opc.db \"SELECT id, phone, nickname, inviteCode FROM users LIMIT 5;\")",
+      "Bash(tsx scripts/fix-invite-codes.ts)",
+      "Bash(echo \"✅ 邀请码修复完成！:*)",
+      "Bash(npm run test:register)",
+      "Bash(sqlite3 data/opc.db \"INSERT INTO users \\(phone, password, nickname, membershipType, inviteCode\\) VALUES \\(''19900000000'', ''$2a$10$dummyhash'', ''测试用户无邀请码'', ''free'', NULL\\); SELECT id, phone, nickname, inviteCode FROM users WHERE phone = ''19900000000'';\")"
     ]
   }
 }

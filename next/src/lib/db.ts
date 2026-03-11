@@ -119,6 +119,18 @@ export function initDb() {
     // 列已存在，忽略
   }
 
+  // 添加邀请码相关列
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN inviteCode TEXT UNIQUE`);
+  } catch {
+    // 列已存在，忽略
+  }
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN invitedBy INTEGER`);
+  } catch {
+    // 列已存在，忽略
+  }
+
   // 兼容旧表迁移：检测旧 schema（username NOT NULL、无 phone 列等）并重建表
   const userColumns = db.prepare("PRAGMA table_info(users)").all() as any[];
   const phoneCol = userColumns.find((col: any) => col.name === 'phone');
@@ -233,6 +245,26 @@ export function initDb() {
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // 创建 invite_records 表（邀请记录）
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS invite_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      inviterId INTEGER NOT NULL,
+      inviteeId INTEGER NOT NULL,
+      inviteCode TEXT NOT NULL,
+      status TEXT DEFAULT 'activated',
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      activatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (inviterId) REFERENCES users(id),
+      FOREIGN KEY (inviteeId) REFERENCES users(id)
+    )
+  `);
+
+  // 为 invite_records 创建索引
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_invite_records_inviterId ON invite_records(inviterId)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_invite_records_inviteeId ON invite_records(inviteeId)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_invite_records_status ON invite_records(status)`);
 
   // 兼容旧表：如果 demands 表没有 location 列，自动添加
   try {

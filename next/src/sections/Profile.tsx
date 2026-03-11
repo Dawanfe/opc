@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { User, Phone, Building2, Briefcase, CheckCircle, MessageCircle } from 'lucide-react';
+import { User, Phone, Building2, Briefcase, CheckCircle, MessageCircle, Gift } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiUrl } from '@/lib/utils';
+import Link from 'next/link';
 
 const benefits = [
   { icon: Building2, title: '政策查询', desc: '全国OPC政策实时查询' },
@@ -190,6 +191,31 @@ export default function Profile() {
             );
           })}
         </div>
+      </div>
+
+      {/* Invite Card */}
+      <div>
+        <h2 className="text-title mb-4">邀请好友</h2>
+        <Link href="/invite">
+          <div className="opc-card p-6 hover:shadow-md transition-shadow cursor-pointer group">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#22C55E]/20 to-[#EAB308]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Gift className="w-7 h-7 text-[#22C55E]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[#111827] mb-1">邀请好友加入 WeOPC</h3>
+                  <p className="text-sm text-[#6B7280]">分享您的专属邀请码，与好友一起成长</p>
+                </div>
+              </div>
+              <div className="text-[#22C55E] group-hover:translate-x-1 transition-transform">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Contact Us */}

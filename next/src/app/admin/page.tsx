@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Calendar, Newspaper, Briefcase, Users, BarChart3, Gift } from 'lucide-react';
+import { Database, Calendar, Newspaper, Briefcase, Users, BarChart3, Gift, Link2 } from 'lucide-react';
 
 export default function AdminPage() {
   return (
@@ -128,6 +128,23 @@ export default function AdminPage() {
           </CardHeader>
           <CardContent>
             <Link href="/admin/invite-stats">
+              <Button className="w-full">进入管理</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader className="flex-1">
+            <div className="flex items-center space-x-2">
+              <Link2 className="w-8 h-8 text-primary" />
+              <CardTitle>外部链接管理</CardTitle>
+            </div>
+            <CardDescription>
+              管理侧边栏和首页的外部链接（如微信公众号文章）
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/admin/external-links">
               <Button className="w-full">进入管理</Button>
             </Link>
           </CardContent>

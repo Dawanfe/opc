@@ -43,27 +43,52 @@ export default function Dashboard() {
   const [cityCount, setCityCount] = useState(26);
   const [communityCount, setCommunityCount] = useState(39);
   const [partnerCount, setPartnerCount] = useState(300);
+  const [externalLinks, setExternalLinks] = useState<any[]>([]);
 
-  const features = useMemo(() => [
-    {
-      title: '免费工位与政策红利',
-      desc: `覆盖全国${communityCount}个OPC社区，提供零成本办公空间和政策补贴`,
-      icon: Building2,
-      color: 'green',
-    },
-    {
-      title: '算力支持与AI工具',
-      desc: '最高1000万算力券补贴，免费使用主流AI开发工具',
-      icon: Zap,
-      color: 'blue',
-    },
-    {
-      title: '订单市场与资源对接',
-      desc: `连接${partnerCount}+生态伙伴，获取AI漫剧、开发、设计等订单`,
-      icon: Handshake,
-      color: 'orange',
-    },
-  ], [communityCount, partnerCount]);
+  const features = useMemo(() => {
+    const staticFeatures = [
+      {
+        title: '免费工位与政策红利',
+        desc: `覆盖全国${communityCount}个OPC社区，提供零成本办公空间和政策补贴`,
+        icon: Building2,
+        color: 'green',
+        link: 'https://weopc.com.cn/policy',
+        sortOrder: 0,
+      },
+      {
+        title: '算力支持与AI工具',
+        desc: '最高1000万算力券补贴，免费使用主流AI开发工具',
+        icon: Zap,
+        color: 'blue',
+        link: 'https://weopc.com.cn/policy',
+        sortOrder: 1,
+      },
+      {
+        title: '订单市场与资源对接',
+        desc: `连接${partnerCount}+生态伙伴，获取AI漫剧、开发、设计等订单`,
+        icon: Handshake,
+        color: 'orange',
+        link: 'https://weopc.com.cn/marketplace',
+        sortOrder: 3,
+      },
+    ];
+
+    // 将外部链接转换为feature格式
+    const externalFeatures = externalLinks
+      .filter((link) => link.position === 'dashboard' || link.position === 'both')
+      .map((link) => ({
+        title: link.label,
+        desc: link.description || '',
+        icon: link.icon,
+        iconImage: link.iconImage,
+        color: link.color || 'purple',
+        link: link.url,
+        sortOrder: link.sortOrder,
+      }));
+
+    // 合并并排序
+    return [...staticFeatures, ...externalFeatures].sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [communityCount, partnerCount, externalLinks]);
 
   useEffect(() => {
     // 获取会员数
@@ -81,6 +106,14 @@ export default function Dashboard() {
         if (data.cityCount) setCityCount(data.cityCount);
         if (data.communityCount) setCommunityCount(data.communityCount);
         if (data.partnerCount) setPartnerCount(data.partnerCount);
+      })
+      .catch(() => {});
+
+    // 获取外部链接
+    fetch(apiUrl('/api/external-links'))
+      .then(res => res.json())
+      .then(data => {
+        setExternalLinks(data);
       })
       .catch(() => {});
   }, []);
@@ -150,26 +183,34 @@ export default function Dashboard() {
           <p className="text-gray-500">从注册到成长，WeOPC为您提供一站式支持</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {features.map((feature) => {
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature: any) => {
             const Icon = feature.icon;
             const colorMap: Record<string, string> = {
               green: 'bg-green-50 text-green-600',
               blue: 'bg-blue-50 text-blue-600',
               orange: 'bg-orange-50 text-orange-600',
+              purple: 'bg-purple-50 text-purple-600',
             };
 
             return (
-              <div
+              <a
                 key={feature.title}
-                className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-md transition-shadow"
+                href={feature.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-md transition-all hover:scale-105 cursor-pointer relative"
               >
                 <div className={`w-12 h-12 ${colorMap[feature.color]} rounded-xl flex items-center justify-center mb-4`}>
-                  <Icon className="w-6 h-6" />
+                  {feature.iconImage ? (
+                    <img src={apiUrl(feature.iconImage)} alt="" className="w-7 h-7" />
+                  ) : (
+                    Icon && <Icon className="w-6 h-6" />
+                  )}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-500 text-sm">{feature.desc}</p>
-              </div>
+              </a>
             );
           })}
         </div>

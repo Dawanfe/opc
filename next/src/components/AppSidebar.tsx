@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Building2,
@@ -8,7 +9,7 @@ import {
   Newspaper,
   UserCircle,
   Menu,
-  X
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -20,18 +21,47 @@ interface AppSidebarProps {
   onMobileClose: () => void;
 }
 
-const navItems = [
-  { id: 'dashboard', label: '首页概览', icon: LayoutDashboard, href: '/' },
-  { id: 'policy', label: '优惠政策与免费工位', icon: Building2, href: '/policy' },
-  { id: 'marketplace', label: '需求广场', icon: Briefcase, href: '/marketplace' },
-  { id: 'events', label: 'AI热门活动', icon: Calendar, href: '/events' },
-  { id: 'news', label: '每日AI新闻', icon: Newspaper, href: '/news' },
-  { id: 'profile', label: '会员中心', icon: UserCircle, href: '/profile' },
+const staticNavItems = [
+  { id: 'dashboard', label: '首页概览', icon: LayoutDashboard, href: '/', sortOrder: 0 },
+  { id: 'policy', label: '优惠政策与免费工位', icon: Building2, href: '/policy', sortOrder: 1 },
+  { id: 'marketplace', label: '需求广场', icon: Briefcase, href: '/marketplace', sortOrder: 3 },
+  { id: 'events', label: 'AI热门活动', icon: Calendar, href: '/events', sortOrder: 4 },
+  { id: 'news', label: '每日AI新闻', icon: Newspaper, href: '/news', sortOrder: 5 },
+  { id: 'profile', label: '会员中心', icon: UserCircle, href: '/profile', sortOrder: 6 },
 ];
 
 export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarProps) {
   const pathname = usePathname();
   const { isLoggedIn, user, setShowLoginModal, logout } = useAuth();
+  const [navItems, setNavItems] = useState<any[]>(staticNavItems);
+
+  useEffect(() => {
+    // 获取外部链接
+    fetch(apiUrl('/api/external-links'))
+      .then(res => res.json())
+      .then((data) => {
+        const externalItems = data
+          .filter((link: any) => link.position === 'sidebar' || link.position === 'both')
+          .map((link: any) => ({
+            id: link.key,
+            label: link.label,
+            icon: link.icon,
+            iconImage: link.iconImage,
+            href: link.url,
+            external: true,
+            hot: link.hot || false,
+            sortOrder: link.sortOrder,
+          }));
+
+        // 合并静态和外部链接，并排序
+        const allItems = [...staticNavItems, ...externalItems].sort((a, b) => a.sortOrder - b.sortOrder);
+        setNavItems(allItems);
+      })
+      .catch(() => {
+        // 出错时使用静态配置
+        setNavItems(staticNavItems);
+      });
+  }, []);
 
   const getActiveId = () => {
     if (pathname === '/') return 'dashboard';
@@ -76,6 +106,31 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
             const Icon = item.icon;
             const isActive = activeSection === item.id;
 
+            // 外部链接
+            if (item.external) {
+              return (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={onMobileClose}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 text-[#6B7280] hover:bg-gray-50 hover:text-[#111827] relative"
+                >
+                  {item.iconImage ? (
+                    <img src={apiUrl(item.iconImage)} alt="" className="w-[22px] h-[22px]" />
+                  ) : (
+                    Icon && <Icon className="w-[18px] h-[18px] text-[#9CA3AF]" />
+                  )}
+                  <span>{item.label}</span>
+                  {item.hot && (
+                    <img src={apiUrl('/hot.png')} alt="HOT" className="ml-auto h-6" />
+                  )}
+                </a>
+              );
+            }
+
+            // 内部链接
             return (
               <Link
                 key={item.id}
@@ -89,7 +144,11 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
                   }
                 `}
               >
-                <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#111827]' : 'text-[#9CA3AF]'}`} />
+                {item.iconImage ? (
+                  <img src={apiUrl(item.iconImage)} alt="" className="w-[18px] h-[18px]" />
+                ) : (
+                  Icon && <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#111827]' : 'text-[#9CA3AF]'}`} />
+                )}
                 <span>{item.label}</span>
                 {isActive && (
                   <div className="ml-auto w-[3px] h-[3px] rounded-full bg-[#3B82F6]" />

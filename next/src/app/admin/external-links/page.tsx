@@ -28,8 +28,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Pencil, Trash2, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, Upload, ArrowLeft } from 'lucide-react';
 import { apiUrl } from '@/lib/utils';
+import Link from 'next/link';
 
 interface ExternalLink {
   id: number;
@@ -194,8 +195,13 @@ export default function ExternalLinksManagementPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-8">
-        <div>
+      <div className="flex items-center gap-4 mb-8">
+        <Link href="/admin">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </Link>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold">外部链接管理</h1>
           <p className="text-muted-foreground mt-2">
             管理侧边栏和首页卡片的外部链接（如微信公众号文章等）
@@ -205,6 +211,15 @@ export default function ExternalLinksManagementPage() {
           <Plus className="w-4 h-4 mr-2" />
           新增链接
         </Button>
+      </div>
+
+      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p className="text-sm text-blue-800">
+          💡 <strong>使用说明：</strong>
+          外部链接可以配置在"侧边栏"、"首页卡片"或"两者都显示"。
+          通过调整排序值来控制显示顺序（数字越小越靠前）。
+          侧边栏链接支持HOT标签，首页卡片链接支持颜色主题配置。
+        </p>
       </div>
 
       <div className="border rounded-lg">
@@ -240,7 +255,7 @@ export default function ExternalLinksManagementPage() {
                 </TableCell>
                 <TableCell>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {link.position === 'sidebar' ? '侧边栏' : '首页卡片'}
+                    {link.position === 'sidebar' ? '侧边栏' : link.position === 'dashboard' ? '首页卡片' : '侧边栏 + 首页卡片'}
                   </span>
                 </TableCell>
                 <TableCell>{link.sortOrder}</TableCell>

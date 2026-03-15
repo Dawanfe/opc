@@ -273,6 +273,26 @@ export function initDb() {
     // 列已存在，忽略
   }
 
+  // 创建 external_links 表（外部链接配置）
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS external_links (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT UNIQUE NOT NULL,
+      label TEXT NOT NULL,
+      description TEXT,
+      icon TEXT,
+      iconImage TEXT,
+      url TEXT NOT NULL,
+      position TEXT NOT NULL,
+      sortOrder REAL DEFAULT 0,
+      enabled INTEGER DEFAULT 1,
+      hot INTEGER DEFAULT 0,
+      color TEXT DEFAULT 'purple',
+      createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+      updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   db.close();
 }
 

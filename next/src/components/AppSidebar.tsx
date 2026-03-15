@@ -10,6 +10,7 @@ import {
   UserCircle,
   Menu,
   X,
+  GraduationCap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -20,6 +21,17 @@ interface AppSidebarProps {
   isMobileOpen: boolean;
   onMobileClose: () => void;
 }
+
+// 图标映射表
+const iconMap: { [key: string]: any } = {
+  LayoutDashboard,
+  Building2,
+  Briefcase,
+  Calendar,
+  Newspaper,
+  UserCircle,
+  GraduationCap,
+};
 
 const staticNavItems = [
   { id: 'dashboard', label: '首页概览', icon: LayoutDashboard, href: '/', sortOrder: 0 },
@@ -45,7 +57,7 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
           .map((link: any) => ({
             id: link.key,
             label: link.label,
-            icon: link.icon,
+            icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : null,
             iconImage: link.iconImage,
             href: link.url,
             external: true,

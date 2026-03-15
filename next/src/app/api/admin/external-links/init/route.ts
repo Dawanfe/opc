@@ -31,13 +31,17 @@ async function initializeData() {
 
     if (existing.count === 0) {
       // 插入初始数据
-      db.prepare(`
-        INSERT INTO external_links (key, label, description, iconImage, url, position, sortOrder, enabled, hot, color)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
+      const insertStmt = db.prepare(`
+        INSERT INTO external_links (key, label, description, icon, iconImage, url, position, sortOrder, enabled, hot, color)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      // 插入申请项目投资
+      insertStmt.run(
         'investment',
         '申请项目投资',
         '单个OPC项目，申请10-200万投资额度，3个工作日内反馈',
+        null,
         '/money-rmb.png',
         'https://mp.weixin.qq.com/s/JS1j0fXw6Tf2t6yrOwbMuQ',
         'both',
@@ -47,8 +51,23 @@ async function initializeData() {
         'purple'
       );
 
+      // 插入OpenClaw学习中心
+      insertStmt.run(
+        'openclaw',
+        'OpenClaw学习中心',
+        'AI开发框架教程，快速上手构建智能应用',
+        'GraduationCap',
+        null,
+        'https://weopc.com.cn/openclaw',
+        'sidebar',
+        2.5,
+        1,
+        0,
+        'blue'
+      );
+
       db.close();
-      return NextResponse.json({ message: 'Initialized successfully', count: 1 });
+      return NextResponse.json({ message: 'Initialized successfully', count: 2 });
     }
 
     db.close();

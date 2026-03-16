@@ -128,30 +128,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }, []);
 
-  // 微信扫码登录 - PC 和移动端兼容处理
+  // 微信扫码登录 - PC 和移动端双AppID方案
   const loginWithWechat = useCallback(async () => {
     const redirectUri = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://weopc.com.cn';
-    const appId = process.env.NEXT_PUBLIC_WECHAT_APP_ID || 'wxb3330c77aa423d29';
     const state = Math.random().toString(36).substring(7);
     const isMobileDevice = isMobile();
 
     console.log('[WeChat Login] Device:', isMobileDevice ? 'Mobile' : 'PC');
     console.log('[WeChat Login] redirectUri:', redirectUri);
-    console.log('[WeChat Login] appId:', appId);
-
-    // PC端和移动端都使用相同的授权URL
-    // 区别在于：PC端直接跳转，移动端在LoginModal中内嵌显示二维码
-    const wechatAuthUrl = `https://open.weixin.qq.com/connect/qrconnect?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUri + '/api/auth/wechat/callback')}&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`;
 
     if (isMobileDevice) {
-      // 移动端：不跳转，LoginModal 会检测设备并显示二维码
-      console.log('[WeChat Login] Mobile: QR code will be displayed in modal');
-      // 注意：实际的二维码显示逻辑在 LoginModal 组件中
-      // 这里只是记录日志，真正的跳转由 LoginModal 处理
+      // 移动端：使用公众号网页授权
+      const mpAppId = process.env.NEXT_PUBLIC_WECHAT_MP_APP_ID; // 公众号AppID（需要申请）
+
+      if (!mpAppId) {
+        console.error('[WeChat Login] 移动端需要配置公众号AppID (NEXT_PUBLIC_WECHAT_MP_APP_ID)');
+        alert('移动端微信登录功能正在配置中，请使用手机号登录或在电脑端访问');
+        return;
+      }
+
+      const wechatMobileAuthUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${mpAppId}&redirect_uri=${encodeURIComponent(redirectUri + '/api/auth/wechat/callback')}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`;
+
+      console.log('[WeChat Login] Mobile: Redirecting to WeChat OAuth (公众号)');
+      console.log('[WeChat Login] Mobile AppID:', mpAppId);
+      window.location.href = wechatMobileAuthUrl;
     } else {
-      // PC端：直接跳转到微信扫码页面
-      console.log('[WeChat Login] PC: Redirecting to WeChat QR page');
-      window.location.href = wechatAuthUrl;
+      // PC端：使用网站应用扫码登录
+      const webAppId = process.env.NEXT_PUBLIC_WECHAT_APP_ID || 'wxb3330c77aa423d29';
+      const wechatPCAuthUrl = `https://open.weixin.qq.com/connect/qrconnect?appid=${webAppId}&redirect_uri=${encodeURIComponent(redirectUri + '/api/auth/wechat/callback')}&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`;
+
+      console.log('[WeChat Login] PC: Redirecting to WeChat QR page (网站应用)');
+      console.log('[WeChat Login] PC AppID:', webAppId);
+      window.location.href = wechatPCAuthUrl;
     }
   }, [isMobile]);
 

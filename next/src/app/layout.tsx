@@ -72,6 +72,34 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // 拦截微信 SDK 的 removeChild 错误
+                if (typeof Node !== 'undefined' && Node.prototype && Node.prototype.removeChild) {
+                  const originalRemoveChild = Node.prototype.removeChild;
+                  Node.prototype.removeChild = function(child) {
+                    try {
+                      // 验证节点关系
+                      if (child && child.parentNode === this) {
+                        return originalRemoveChild.call(this, child);
+                      } else {
+                        console.debug('[DOM] Suppressed removeChild error: child is not a direct descendant');
+                        return child;
+                      }
+                    } catch (e) {
+                      console.debug('[DOM] Suppressed removeChild error:', e.message);
+                      return child;
+                    }
+                  };
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <AdminAuthProvider>
           <AuthProvider>

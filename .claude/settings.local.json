@@ -71,7 +71,15 @@
       "Bash(git fetch origin)",
       "Bash(for img in logo.png money-rmb.png hot.png)",
       "Bash(do echo -n \"$img: \")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git add next/src/app/layout.tsx next/src/app/page.tsx next/public/robots.txt next/public/manifest.json next/src/app/sitemap.xml/ next/src/components/StructuredData.tsx)",
+      "Bash(git add SEO_CHECKLIST.md verify-seo.sh)",
+      "Bash(open /Users/zhanglei/test/opc/test-wechat-error.html)",
+      "Bash(open test-wechat-error.html)",
+      "Bash(open \"http://localhost:8888/test-wechat-error.html\")",
+      "Bash(open \"http://localhost:3000\")",
+      "Bash(open \"http://localhost:8888/test-dom-override.html\")",
+      "Bash(open \"https://weopc.com.cn\")"
     ]
   }
 }

@@ -29,10 +29,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [inviteCode, setInviteCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [qrcodeLoaded, setQrcodeLoaded] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
 
-  const { login, register, loginWithWechat, isMobile } = useAuth();
+  const { login, register, loginWithWechat } = useAuth();
 
   // 检查是否有待处理的邀请码
   useEffect(() => {
@@ -45,71 +43,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
     }
   }, [isOpen]);
-
-  // 移动端加载微信 JS-SDK 生成二维码
-  useEffect(() => {
-    if (!isOpen || activeTab !== 'wechat' || !isMobile()) return;
-
-    // 生成二维码参数
-    const redirectUri = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://weopc.com.cn';
-    const appId = process.env.NEXT_PUBLIC_WECHAT_APP_ID || 'wxb3330c77aa423d29';
-    const state = Math.random().toString(36).substring(7);
-
-    // 检查是否已经加载了微信 JS
-    if (typeof window !== 'undefined' && (window as any).WxLogin) {
-      renderWechatQRCode(appId, redirectUri, state);
-      return;
-    }
-
-    // 动态加载微信 JS-SDK
-    const script = document.createElement('script');
-    script.src = 'https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js';
-    script.async = true;
-    script.onload = () => {
-      renderWechatQRCode(appId, redirectUri, state);
-    };
-    script.onerror = () => {
-      console.error('[WeChat QRCode] Failed to load WeChat JS-SDK');
-      setQrcodeLoaded(false);
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      // 清理
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, [isOpen, activeTab, isMobile]);
-
-  // 渲染微信二维码
-  const renderWechatQRCode = (appId: string, redirectUri: string, state: string) => {
-    try {
-      const container = document.getElementById('wechat-qrcode-container');
-      if (!container) return;
-
-      // 清空容器
-      container.innerHTML = '';
-
-      // 使用微信官方 JS 生成二维码
-      new (window as any).WxLogin({
-        self_redirect: false,
-        id: 'wechat-qrcode-container',
-        appid: appId,
-        scope: 'snsapi_login',
-        redirect_uri: encodeURIComponent(redirectUri + '/api/auth/wechat/callback'),
-        state: state,
-        style: 'black',
-        href: 'data:text/css;base64,LmltcG93ZXJCb3ggLnFyY29kZSB7d2lkdGg6IDIwMHB4O30KLmltcG93ZXJCb3ggLnRpdGxlIHtkaXNwbGF5OiBub25lO30KLmltcG93ZXJCb3ggLmluZm8ge3dpZHRoOiAyMDBweDt9Cg==' // 自定义样式，隐藏标题
-      });
-
-      setQrcodeLoaded(true);
-      console.log('[WeChat QRCode] QR code rendered successfully');
-    } catch (error) {
-      console.error('[WeChat QRCode] Failed to render:', error);
-      setQrcodeLoaded(false);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -128,34 +61,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   };
 
   const handleWechatLogin = () => {
-    // PC端：在当前窗口直接跳转到微信授权页面
-    // 移动端：逻辑已在 useEffect 中处理（显示二维码）
-    if (!isMobile()) {
-      loginWithWechat();
-    }
-  };
-
-  // 复制链接功能（移动端备用方案）
-  const handleCopyLink = () => {
-    const redirectUri = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://weopc.com.cn';
-    const appId = process.env.NEXT_PUBLIC_WECHAT_APP_ID || 'wxb3330c77aa423d29';
-    const state = Math.random().toString(36).substring(7);
-    const wechatAuthUrl = `https://open.weixin.qq.com/connect/qrconnect?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUri + '/api/auth/wechat/callback')}&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`;
-
-    navigator.clipboard.writeText(wechatAuthUrl).then(() => {
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    }).catch(() => {
-      // 降级方案：创建临时输入框复制
-      const textArea = document.createElement('textarea');
-      textArea.value = wechatAuthUrl;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    });
+    // PC端和移动端都直接跳转到微信授权页面
+    loginWithWechat();
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -286,99 +193,33 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         <div className="p-8">
           {activeTab === 'wechat' ? (
             <div className="space-y-6">
-              {isMobile() ? (
-                /* 移动端：显示内嵌二维码 + 使用说明 */
-                <div className="space-y-4">
-                  {/* 二维码容器 */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      id="wechat-qrcode-container"
-                      className="w-full flex items-center justify-center min-h-[240px] bg-gray-50 rounded-xl overflow-hidden"
-                    >
-                      {!qrcodeLoaded && (
-                        <div className="flex flex-col items-center gap-3">
-                          <Loader2 className="w-8 h-8 text-[#07C160] animate-spin" />
-                          <p className="text-sm text-gray-500">加载二维码中...</p>
-                        </div>
-                      )}
-                    </div>
+              {/* 微信登录 - PC和移动端统一处理 */}
+              <div className="space-y-6">
+                {/* 微信扫码登录区域 */}
+                <div className="flex flex-col items-center justify-center py-4">
+                  <div className="w-48 h-48 bg-gradient-to-br from-[#07C160]/10 to-[#07C160]/5 rounded-xl flex items-center justify-center mb-4">
+                    <WechatIcon className="w-24 h-24 text-[#07C160]" />
                   </div>
 
-                  {/* 使用说明 */}
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 rounded-xl space-y-3 border border-blue-200">
-                    <div className="flex items-start gap-2">
-                      <Smartphone className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-900 mb-2">📱 移动端扫码步骤：</p>
-                        <ol className="text-xs text-gray-700 space-y-1.5 list-decimal list-inside">
-                          <li><strong>长按</strong>上方二维码保存到相册</li>
-                          <li>打开<strong>微信</strong>，点击右上角 <strong>+</strong></li>
-                          <li>选择<strong>扫一扫</strong>，点击右上角相册图标</li>
-                          <li>选择刚才保存的二维码图片</li>
-                          <li>在微信中确认授权登录</li>
-                        </ol>
-                      </div>
-                    </div>
-                  </div>
+                  <Button
+                    onClick={handleWechatLogin}
+                    className="w-full h-12 bg-[#07C160] hover:bg-[#06AD56] text-white font-medium"
+                  >
+                    <span className="flex items-center gap-2">
+                      <WechatIcon className="w-5 h-5" />
+                      微信授权登录
+                    </span>
+                  </Button>
 
-                  {/* 备用方案：复制链接 */}
-                  <div className="bg-gray-50 p-4 rounded-xl space-y-2 border border-gray-200">
-                    <p className="text-xs font-medium text-gray-700">或者使用备用方式：</p>
-                    <Button
-                      onClick={handleCopyLink}
-                      variant="outline"
-                      className="w-full h-10 text-sm"
-                    >
-                      {copySuccess ? (
-                        <span className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-green-600" />
-                          已复制链接
-                        </span>
-                      ) : (
-                        '复制登录链接'
-                      )}
-                    </Button>
-                    <p className="text-xs text-gray-500">
-                      复制后在微信中打开该链接完成登录
-                    </p>
-                  </div>
+                  <p className="text-sm text-gray-600 text-center mt-4">
+                    点击按钮跳转微信授权登录
+                  </p>
 
-                  {/* 提示信息 */}
-                  <div className="text-center">
-                    <p className="text-xs text-gray-400">
-                      💡 建议在电脑端访问 <span className="font-mono text-gray-600">weopc.com.cn</span> 获得更好体验
-                    </p>
-                  </div>
+                  <p className="text-xs text-gray-400 text-center">
+                    安全便捷，无需记忆密码
+                  </p>
                 </div>
-              ) : (
-                /* PC端：跳转到微信扫码页面 */
-                <div className="space-y-6">
-                  {/* 微信扫码登录区域 */}
-                  <div className="flex flex-col items-center justify-center py-4">
-                    <div className="w-48 h-48 bg-gradient-to-br from-[#07C160]/10 to-[#07C160]/5 rounded-xl flex items-center justify-center mb-4">
-                      <WechatIcon className="w-24 h-24 text-[#07C160]" />
-                    </div>
-
-                    <Button
-                      onClick={handleWechatLogin}
-                      className="w-full h-12 bg-[#07C160] hover:bg-[#06AD56] text-white font-medium"
-                    >
-                      <span className="flex items-center gap-2">
-                        <WechatIcon className="w-5 h-5" />
-                        微信扫码登录
-                      </span>
-                    </Button>
-
-                    <p className="text-sm text-gray-600 text-center mt-4">
-                      点击按钮跳转微信扫码授权登录
-                    </p>
-
-                    <p className="text-xs text-gray-400 text-center">
-                      安全便捷，无需记忆密码
-                    </p>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
           ) : activeTab === 'login' ? (
             <form onSubmit={handleLogin} className="space-y-5">

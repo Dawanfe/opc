@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 
-// 微信开放平台配置 - 请在环境变量中配置
-const WECHAT_APP_ID = process.env.WECHAT_APP_ID || 'YOUR_WECHAT_APP_ID';
-const WECHAT_APP_SECRET = process.env.WECHAT_APP_SECRET || 'YOUR_WECHAT_APP_SECRET';
+// 微信配置 - 双AppID方案
+// PC端：网站应用（开放平台）
+const WECHAT_WEB_APP_ID = process.env.WECHAT_APP_ID || 'YOUR_WECHAT_APP_ID';
+const WECHAT_WEB_APP_SECRET = process.env.WECHAT_APP_SECRET || 'YOUR_WECHAT_APP_SECRET';
+
+// 移动端：公众号（公众平台）
+const WECHAT_MP_APP_ID = process.env.WECHAT_MP_APP_ID || '';
+const WECHAT_MP_APP_SECRET = process.env.WECHAT_MP_APP_SECRET || '';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key-2024';
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000';
 
@@ -33,7 +39,7 @@ interface WechatUserInfo {
   errmsg?: string;
 }
 
-// 处理微信回调
+// 处理微信回调 - 支持双AppID（PC网站应用 + 移动端公众号）
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
@@ -45,15 +51,38 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // 判断是PC端还是移动端的回调
+    // 方法：尝试用PC端的AppID换取token，失败则使用移动端的AppID
+    let appId = WECHAT_WEB_APP_ID;
+    let appSecret = WECHAT_WEB_APP_SECRET;
+    let isMobileCallback = false;
+
     // 1. 使用 code 换取 access_token
-    const tokenUrl = new URL('https://api.weixin.qq.com/sns/oauth2/access_token');
-    tokenUrl.searchParams.set('appid', WECHAT_APP_ID);
-    tokenUrl.searchParams.set('secret', WECHAT_APP_SECRET);
+    let tokenUrl = new URL('https://api.weixin.qq.com/sns/oauth2/access_token');
+    tokenUrl.searchParams.set('appid', appId);
+    tokenUrl.searchParams.set('secret', appSecret);
     tokenUrl.searchParams.set('code', code);
     tokenUrl.searchParams.set('grant_type', 'authorization_code');
 
-    const tokenResponse = await fetch(tokenUrl.toString());
-    const tokenData: WechatTokenResponse = await tokenResponse.json();
+    let tokenResponse = await fetch(tokenUrl.toString());
+    let tokenData: WechatTokenResponse = await tokenResponse.json();
+
+    // 如果PC端失败（错误码40163表示code已使用或无效），尝试移动端
+    if (tokenData.errcode && WECHAT_MP_APP_ID && WECHAT_MP_APP_SECRET) {
+      console.log('[WeChat Callback] PC端获取token失败，尝试使用移动端公众号AppID');
+      appId = WECHAT_MP_APP_ID;
+      appSecret = WECHAT_MP_APP_SECRET;
+      isMobileCallback = true;
+
+      tokenUrl = new URL('https://api.weixin.qq.com/sns/oauth2/access_token');
+      tokenUrl.searchParams.set('appid', appId);
+      tokenUrl.searchParams.set('secret', appSecret);
+      tokenUrl.searchParams.set('code', code);
+      tokenUrl.searchParams.set('grant_type', 'authorization_code');
+
+      tokenResponse = await fetch(tokenUrl.toString());
+      tokenData = await tokenResponse.json();
+    }
 
     if (tokenData.errcode) {
       console.error('微信获取token失败:', tokenData);
@@ -61,6 +90,10 @@ export async function GET(request: NextRequest) {
     }
 
     const { access_token, openid, unionid } = tokenData;
+
+    console.log(`[WeChat Callback] 登录来源: ${isMobileCallback ? '移动端公众号' : 'PC端网站应用'}`);
+    console.log(`[WeChat Callback] AppID: ${appId}`);
+    console.log(`[WeChat Callback] OpenID: ${openid}`);
 
     // 2. 使用 access_token 获取用户信息
     const userInfoUrl = new URL('https://api.weixin.qq.com/sns/userinfo');

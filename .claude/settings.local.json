@@ -61,7 +61,17 @@
       "Bash(git commit -m \"feat: 增强部署脚本，自动处理 Docker 镜像拉取\")",
       "Bash(git commit -m \"fix: 恢复完整的部署脚本（包含服务器配置）\")",
       "Bash(git add -A)",
-      "Bash(git commit -m \"fix: 修复邀请统计 API URL 错误，添加管理后台入口\")"
+      "Bash(git commit -m \"fix: 修复邀请统计 API URL 错误，添加管理后台入口\")",
+      "Bash(git commit:*)",
+      "Bash(sqlite3 data/opc.db \"SELECT * FROM external_links;\")",
+      "Bash(sqlite3 data/opc.db \".tables\")",
+      "Bash(sqlite3 data/opc.db \"SELECT name FROM sqlite_master WHERE type=''table'' AND name=''external_links'';\")",
+      "Bash(git add next/src/lib/db.ts)",
+      "Bash(git reset HEAD .claude/settings.local.json WECHAT_LOGIN_MOBILE_SUPPORT.md next/global.d.ts next/src/components/LoginModal.tsx next/src/contexts/AuthContext.tsx next/tests/test-generate-invite.ts)",
+      "Bash(git fetch origin)",
+      "Bash(for img in logo.png money-rmb.png hot.png)",
+      "Bash(do echo -n \"$img: \")",
+      "Bash(done)"
     ]
   }
 }

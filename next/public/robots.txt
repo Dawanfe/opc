@@ -1,0 +1,13 @@
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /api/admin/
+
+# Sitemap
+Sitemap: https://weopc.com.cn/sitemap.xml
+
+# Crawl delay (optional, for polite crawling)
+Crawl-delay: 1

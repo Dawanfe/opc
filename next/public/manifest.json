@@ -1,0 +1,23 @@
+{
+  "name": "WeOPC - 全国一站式OPC服务平台",
+  "short_name": "WeOPC",
+  "description": "连接全国OPC社区资源，为AI时代的超级个体提供政策、工位、算力、投资一站式解决方案",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/ico.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/ico.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

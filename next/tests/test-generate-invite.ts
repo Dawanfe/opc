@@ -4,14 +4,14 @@
  * 测试生成邀请码API
  */
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE_TEST_INVITE = 'http://localhost:3000';
 
 async function testGenerateInviteCode() {
   console.log('🧪 测试生成邀请码功能\n');
 
   // 1. 先登录获取token
   console.log('1️⃣ 登录获取token...');
-  const loginResponse = await fetch(`${API_BASE}/api/auth/login`, {
+  const loginResponse = await fetch(`${API_BASE_TEST_INVITE}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -33,7 +33,7 @@ async function testGenerateInviteCode() {
 
   // 2. 调用生成邀请码API
   console.log('2️⃣ 生成邀请码...');
-  const generateResponse = await fetch(`${API_BASE}/api/user/generate-invite-code`, {
+  const generateResponse = await fetch(`${API_BASE_TEST_INVITE}/api/user/generate-invite-code`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -59,7 +59,7 @@ async function testGenerateInviteCode() {
 
   // 3. 验证邀请码
   console.log('3️⃣ 验证邀请码...');
-  const inviteInfoResponse = await fetch(`${API_BASE}/api/user/invite-info`, {
+  const inviteInfoResponse = await fetch(`${API_BASE_TEST_INVITE}/api/user/invite-info`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
@@ -82,7 +82,7 @@ async function testGenerateInviteCode() {
 
   // 4. 尝试再次生成（应该失败）
   console.log('4️⃣ 测试重复生成（应该失败）...');
-  const generateResponse2 = await fetch(`${API_BASE}/api/user/generate-invite-code`, {
+  const generateResponse2 = await fetch(`${API_BASE_TEST_INVITE}/api/user/generate-invite-code`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`

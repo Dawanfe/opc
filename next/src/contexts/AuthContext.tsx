@@ -24,6 +24,7 @@ interface AuthContextType {
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
   requireAuth: (callback: () => void) => void;
+  isMobile: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -121,18 +122,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isLoggedIn]);
 
-  // 微信扫码登录 - 跳转到微信授权页面
+  // 检测是否为移动设备
+  const isMobile = useCallback(() => {
+    if (typeof window === 'undefined') return false;
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }, []);
+
+  // 微信扫码登录 - PC 和移动端兼容处理
   const loginWithWechat = useCallback(async () => {
-    // 直接在当前页面跳转到微信授权页面
     const redirectUri = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://weopc.com.cn';
     const appId = process.env.NEXT_PUBLIC_WECHAT_APP_ID || 'wxb3330c77aa423d29';
     const state = Math.random().toString(36).substring(7);
-    const wechatAuthUrl = `https://open.weixin.qq.com/connect/qrconnect?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}/api/auth/wechat/callback&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`;
+    const isMobileDevice = isMobile();
 
+    console.log('[WeChat Login] Device:', isMobileDevice ? 'Mobile' : 'PC');
     console.log('[WeChat Login] redirectUri:', redirectUri);
     console.log('[WeChat Login] appId:', appId);
-    window.location.href = wechatAuthUrl;
-  }, []);
+
+    // PC端和移动端都使用相同的授权URL
+    // 区别在于：PC端直接跳转，移动端在LoginModal中内嵌显示二维码
+    const wechatAuthUrl = `https://open.weixin.qq.com/connect/qrconnect?appid=${appId}&redirect_uri=${encodeURIComponent(redirectUri + '/api/auth/wechat/callback')}&response_type=code&scope=snsapi_login&state=${state}#wechat_redirect`;
+
+    if (isMobileDevice) {
+      // 移动端：不跳转，LoginModal 会检测设备并显示二维码
+      console.log('[WeChat Login] Mobile: QR code will be displayed in modal');
+      // 注意：实际的二维码显示逻辑在 LoginModal 组件中
+      // 这里只是记录日志，真正的跳转由 LoginModal 处理
+    } else {
+      // PC端：直接跳转到微信扫码页面
+      console.log('[WeChat Login] PC: Redirecting to WeChat QR page');
+      window.location.href = wechatAuthUrl;
+    }
+  }, [isMobile]);
 
   // 处理微信登录回调（页面加载时检查 URL 参数）
   const handleWechatCallback = useCallback((): boolean => {
@@ -212,6 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         showLoginModal,
         setShowLoginModal,
         requireAuth,
+        isMobile,
       }}
     >
       {children}

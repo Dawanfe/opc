@@ -22,6 +22,20 @@ const nextConfig: NextConfig = {
     config.externals = [...(config.externals || []), 'better-sqlite3'];
     return config;
   },
+
+  // Rewrites for local development - proxy openclaw content
+  async rewrites() {
+    return [
+      {
+        source: '/openclaw-embed',
+        destination: 'https://weopc.com.cn/openclaw/',
+      },
+      {
+        source: '/openclaw-embed/:path*',
+        destination: 'https://weopc.com.cn/openclaw/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

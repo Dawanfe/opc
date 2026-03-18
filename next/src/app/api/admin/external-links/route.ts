@@ -40,7 +40,11 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { key, label, description, icon, iconImage, url, position, sortOrder = 0, enabled = 1, hot = 0, color = 'purple' } = body;
+    const {
+      key, label, description, icon, iconImage, iconImageActive,
+      dashboardIcon, dashboardIconImage, url, position,
+      sortOrder = 0, enabled = 1, hot = 0, color = 'purple'
+    } = body;
 
     if (!key || !label || !url || !position) {
       return NextResponse.json(
@@ -52,9 +56,17 @@ export async function POST(request: NextRequest) {
     const db = getDb();
 
     const result = db.prepare(`
-      INSERT INTO external_links (key, label, description, icon, iconImage, url, position, sortOrder, enabled, hot, color, createdAt, updatedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    `).run(key, label, description, icon, iconImage, url, position, sortOrder, enabled, hot, color);
+      INSERT INTO external_links (
+        key, label, description, icon, iconImage, iconImageActive,
+        dashboardIcon, dashboardIconImage, url, position, sortOrder,
+        enabled, hot, color, createdAt, updatedAt
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    `).run(
+      key, label, description, icon, iconImage, iconImageActive,
+      dashboardIcon, dashboardIconImage, url, position, sortOrder,
+      enabled, hot, color
+    );
 
     const newLink = db.prepare('SELECT * FROM external_links WHERE id = ?').get(result.lastInsertRowid);
     db.close();
@@ -73,7 +85,11 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, key, label, description, icon, iconImage, url, position, sortOrder, enabled, hot, color } = body;
+    const {
+      id, key, label, description, icon, iconImage, iconImageActive,
+      dashboardIcon, dashboardIconImage, url, position, sortOrder,
+      enabled, hot, color
+    } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
@@ -83,9 +99,16 @@ export async function PUT(request: NextRequest) {
 
     db.prepare(`
       UPDATE external_links
-      SET key = ?, label = ?, description = ?, icon = ?, iconImage = ?, url = ?, position = ?, sortOrder = ?, enabled = ?, hot = ?, color = ?, updatedAt = CURRENT_TIMESTAMP
+      SET key = ?, label = ?, description = ?, icon = ?, iconImage = ?,
+          iconImageActive = ?, dashboardIcon = ?, dashboardIconImage = ?,
+          url = ?, position = ?, sortOrder = ?, enabled = ?, hot = ?,
+          color = ?, updatedAt = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(key, label, description, icon, iconImage, url, position, sortOrder, enabled, hot, color, id);
+    `).run(
+      key, label, description, icon, iconImage, iconImageActive,
+      dashboardIcon, dashboardIconImage, url, position, sortOrder,
+      enabled, hot, color, id
+    );
 
     const updatedLink = db.prepare('SELECT * FROM external_links WHERE id = ?').get(id);
     db.close();

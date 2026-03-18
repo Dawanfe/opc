@@ -79,8 +79,8 @@ export default function Dashboard() {
       .map((link) => ({
         title: link.label,
         desc: link.description || '',
-        icon: link.icon,
-        iconImage: link.iconImage,
+        icon: link.dashboardIcon || link.icon,
+        iconImage: link.dashboardIconImage || link.iconImage,
         color: link.color || 'purple',
         link: link.url,
         sortOrder: link.sortOrder,
@@ -163,7 +163,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-pink-500 mb-1">
-              <AnimatedCounter target={memberCount} suffix="+" />
+              <AnimatedCounter target={memberCount} />
             </div>
             <div className="text-sm text-gray-500">OPC会员</div>
           </div>

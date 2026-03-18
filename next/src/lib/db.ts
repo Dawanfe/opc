@@ -282,6 +282,9 @@ export function initDb() {
       description TEXT,
       icon TEXT,
       iconImage TEXT,
+      iconImageActive TEXT,
+      dashboardIcon TEXT,
+      dashboardIconImage TEXT,
       url TEXT NOT NULL,
       position TEXT NOT NULL,
       sortOrder REAL DEFAULT 0,
@@ -292,6 +295,23 @@ export function initDb() {
       updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // 兼容旧表：添加新字段
+  try {
+    db.exec(`ALTER TABLE external_links ADD COLUMN iconImageActive TEXT`);
+  } catch {
+    // 列已存在，忽略
+  }
+  try {
+    db.exec(`ALTER TABLE external_links ADD COLUMN dashboardIcon TEXT`);
+  } catch {
+    // 列已存在，忽略
+  }
+  try {
+    db.exec(`ALTER TABLE external_links ADD COLUMN dashboardIconImage TEXT`);
+  } catch {
+    // 列已存在，忽略
+  }
 
   db.close();
 }

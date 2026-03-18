@@ -59,6 +59,7 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
             label: link.label,
             icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : null,
             iconImage: link.iconImage,
+            iconImageActive: link.iconImageActive,
             href: link.url,
             external: true,
             hot: link.hot || false,
@@ -157,7 +158,7 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
                 `}
               >
                 {item.iconImage ? (
-                  <img src={apiUrl(item.iconImage)} alt="" className="w-[18px] h-[18px]" />
+                  <img src={apiUrl(isActive && item.iconImageActive ? item.iconImageActive : item.iconImage)} alt="" className="w-[18px] h-[18px]" />
                 ) : (
                   Icon && <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-[#111827]' : 'text-[#9CA3AF]'}`} />
                 )}

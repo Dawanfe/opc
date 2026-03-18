@@ -39,6 +39,9 @@ interface ExternalLink {
   description?: string;
   icon?: string;
   iconImage?: string;
+  iconImageActive?: string;
+  dashboardIcon?: string;
+  dashboardIconImage?: string;
   url: string;
   position: string;
   sortOrder: number;
@@ -60,6 +63,9 @@ export default function ExternalLinksManagementPage() {
     description: '',
     icon: '',
     iconImage: '',
+    iconImageActive: '',
+    dashboardIcon: '',
+    dashboardIconImage: '',
     url: '',
     position: 'sidebar',
     sortOrder: 0,
@@ -68,6 +74,8 @@ export default function ExternalLinksManagementPage() {
     color: 'purple',
   });
   const [uploadingIcon, setUploadingIcon] = useState(false);
+  const [uploadingActiveIcon, setUploadingActiveIcon] = useState(false);
+  const [uploadingDashboardIcon, setUploadingDashboardIcon] = useState(false);
 
   useEffect(() => {
     fetchLinks();
@@ -136,6 +144,9 @@ export default function ExternalLinksManagementPage() {
       description: link.description || '',
       icon: link.icon || '',
       iconImage: link.iconImage || '',
+      iconImageActive: link.iconImageActive || '',
+      dashboardIcon: link.dashboardIcon || '',
+      dashboardIconImage: link.dashboardIconImage || '',
       url: link.url,
       position: link.position,
       sortOrder: link.sortOrder,
@@ -155,6 +166,9 @@ export default function ExternalLinksManagementPage() {
       description: '',
       icon: '',
       iconImage: '',
+      iconImageActive: '',
+      dashboardIcon: '',
+      dashboardIconImage: '',
       url: '',
       position: 'sidebar',
       sortOrder: 0,
@@ -186,6 +200,56 @@ export default function ExternalLinksManagementPage() {
       console.error('Failed to upload icon:', error);
     } finally {
       setUploadingIcon(false);
+    }
+  };
+
+  const handleActiveIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingActiveIcon(true);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const res = await fetch(apiUrl('/api/upload'), {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setFormData({ ...formData, iconImageActive: data.path });
+      }
+    } catch (error) {
+      console.error('Failed to upload active icon:', error);
+    } finally {
+      setUploadingActiveIcon(false);
+    }
+  };
+
+  const handleDashboardIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingDashboardIcon(true);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      const res = await fetch(apiUrl('/api/upload'), {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setFormData({ ...formData, dashboardIconImage: data.path });
+      }
+    } catch (error) {
+      console.error('Failed to upload dashboard icon:', error);
+    } finally {
+      setUploadingDashboardIcon(false);
     }
   };
 
@@ -379,7 +443,7 @@ export default function ExternalLinksManagementPage() {
             </div>
 
             <div>
-              <Label htmlFor="iconImage">图标图片</Label>
+              <Label htmlFor="iconImage">侧边栏图标 - 默认状态</Label>
               <div className="flex items-center gap-4">
                 <Input
                   id="iconImage"
@@ -412,21 +476,112 @@ export default function ExternalLinksManagementPage() {
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                推荐尺寸：64x64px，PNG格式，透明背景
+                侧边栏Tab默认状态图标，推荐尺寸：64x64px，PNG格式，透明背景
               </p>
             </div>
 
             <div>
-              <Label htmlFor="icon">Lucide图标名 (可选)</Label>
-              <Input
-                id="icon"
-                value={formData.icon}
-                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                placeholder="DollarSign"
-              />
+              <Label htmlFor="iconImageActive">侧边栏图标 - 激活状态</Label>
+              <div className="flex items-center gap-4">
+                <Input
+                  id="iconImageActive"
+                  value={formData.iconImageActive}
+                  onChange={(e) => setFormData({ ...formData, iconImageActive: e.target.value })}
+                  placeholder="/money-rmb-active.png"
+                />
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleActiveIconUpload}
+                    className="hidden"
+                    id="active-icon-upload"
+                    disabled={uploadingActiveIcon}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('active-icon-upload')?.click()}
+                    disabled={uploadingActiveIcon}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingActiveIcon ? '上传中...' : '上传'}
+                  </Button>
+                </div>
+                {formData.iconImageActive && (
+                  <img src={apiUrl(formData.iconImageActive)} alt="" className="w-8 h-8" />
+                )}
+              </div>
               <p className="text-xs text-muted-foreground mt-1">
-                如果未上传图标图片，将使用Lucide图标库中的图标
+                侧边栏Tab激活时显示的图标（可选，未设置则使用默认图标）
               </p>
+            </div>
+
+            <div>
+              <Label htmlFor="dashboardIconImage">首页卡片图标</Label>
+              <div className="flex items-center gap-4">
+                <Input
+                  id="dashboardIconImage"
+                  value={formData.dashboardIconImage}
+                  onChange={(e) => setFormData({ ...formData, dashboardIconImage: e.target.value })}
+                  placeholder="/money-rmb-card.png"
+                />
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleDashboardIconUpload}
+                    className="hidden"
+                    id="dashboard-icon-upload"
+                    disabled={uploadingDashboardIcon}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('dashboard-icon-upload')?.click()}
+                    disabled={uploadingDashboardIcon}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    {uploadingDashboardIcon ? '上传中...' : '上传'}
+                  </Button>
+                </div>
+                {formData.dashboardIconImage && (
+                  <img src={apiUrl(formData.dashboardIconImage)} alt="" className="w-8 h-8" />
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                首页"全周期创业服务"卡片图标（可选，未设置则使用侧边栏图标）
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="icon">侧边栏Lucide图标 (可选)</Label>
+                <Input
+                  id="icon"
+                  value={formData.icon}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                  placeholder="DollarSign"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  侧边栏未上传图标图片时使用
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="dashboardIcon">首页卡片Lucide图标 (可选)</Label>
+                <Input
+                  id="dashboardIcon"
+                  value={formData.dashboardIcon}
+                  onChange={(e) => setFormData({ ...formData, dashboardIcon: e.target.value })}
+                  placeholder="DollarSign"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  首页卡片未上传图标图片时使用
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

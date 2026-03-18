@@ -54,17 +54,20 @@ export default function AppSidebar({ isMobileOpen, onMobileClose }: AppSidebarPr
       .then((data) => {
         const externalItems = data
           .filter((link: any) => link.position === 'sidebar' || link.position === 'both')
-          .map((link: any) => ({
-            id: link.key,
-            label: link.label,
-            icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : null,
-            iconImage: link.iconImage,
-            iconImageActive: link.iconImageActive,
-            href: link.url,
-            external: true,
-            hot: link.hot || false,
-            sortOrder: link.sortOrder,
-          }));
+          .map((link: any) => {
+            const isInternal = link.url.startsWith('/');
+            return {
+              id: link.key,
+              label: link.label,
+              icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : null,
+              iconImage: link.iconImage,
+              iconImageActive: link.iconImageActive,
+              href: link.url,
+              external: !isInternal,
+              hot: link.hot || false,
+              sortOrder: link.sortOrder,
+            };
+          });
 
         // 合并静态和外部链接，并排序
         const allItems = [...staticNavItems, ...externalItems].sort((a, b) => a.sortOrder - b.sortOrder);

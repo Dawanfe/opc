@@ -71,7 +71,7 @@ async function initializeData() {
         null,
         null,
         null,
-        'https://weopc.com.cn/openclaw',
+        '/openclaw',
         'sidebar',
         2.5,
         1,
@@ -82,23 +82,69 @@ async function initializeData() {
       db.close();
       return NextResponse.json({ message: 'Initialized successfully', count: 2 });
     } else {
-      // 已有数据，检查是否需要更新investment记录
-      const investmentRecord = db.prepare('SELECT * FROM external_links WHERE key = ?').get('investment') as any;
+      // 已有数据，使用 upsert 逻辑更新
+      const upsertStmt = db.prepare(`
+        INSERT INTO external_links (
+          key, label, description, icon, iconImage, iconImageActive,
+          dashboardIcon, dashboardIconImage, url, position, sortOrder,
+          enabled, hot, color
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(key) DO UPDATE SET
+          label = excluded.label,
+          description = excluded.description,
+          icon = excluded.icon,
+          iconImage = excluded.iconImage,
+          iconImageActive = excluded.iconImageActive,
+          dashboardIcon = excluded.dashboardIcon,
+          dashboardIconImage = excluded.dashboardIconImage,
+          url = excluded.url,
+          position = excluded.position,
+          sortOrder = excluded.sortOrder,
+          enabled = excluded.enabled,
+          hot = excluded.hot,
+          color = excluded.color,
+          updatedAt = CURRENT_TIMESTAMP
+      `);
 
-      if (investmentRecord && (!investmentRecord.iconImageActive || !investmentRecord.dashboardIconImage)) {
-        // 更新investment记录，添加激活图标和卡片图标
-        db.prepare(`
-          UPDATE external_links
-          SET iconImageActive = ?, dashboardIconImage = ?, updatedAt = CURRENT_TIMESTAMP
-          WHERE key = ?
-        `).run('/money-rmb-active.png', '/money-rmb-card.png', 'investment');
+      // 更新申请项目投资
+      upsertStmt.run(
+        'investment',
+        '申请项目投资',
+        '单个OPC项目，申请10-200万投资额度，3个工作日内反馈',
+        null,
+        '/money-rmb.png',
+        '/money-rmb-active.png',
+        null,
+        '/money-rmb-card.png',
+        'https://mp.weixin.qq.com/s/JS1j0fXw6Tf2t6yrOwbMuQ',
+        'both',
+        2,
+        1,
+        1,
+        'purple'
+      );
 
-        db.close();
-        return NextResponse.json({ message: 'Updated investment icons', count: existing.count });
-      }
+      // 更新OpenClaw学习中心
+      upsertStmt.run(
+        'openclaw',
+        'OpenClaw学习中心',
+        'AI开发框架教程，快速上手构建智能应用',
+        'GraduationCap',
+        null,
+        null,
+        null,
+        null,
+        '/openclaw',
+        'sidebar',
+        2.5,
+        1,
+        0,
+        'blue'
+      );
 
       db.close();
-      return NextResponse.json({ message: 'Already initialized', count: existing.count });
+      return NextResponse.json({ message: 'Updated successfully', count: existing.count });
     }
   } catch (error) {
     console.error('Error initializing external links:', error);

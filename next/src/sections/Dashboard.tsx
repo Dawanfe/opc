@@ -11,6 +11,13 @@ import {Button} from '@/components/ui/button';
 import {apiUrl} from '@/lib/utils';
 import {useAuth} from '@/contexts/AuthContext';
 
+// Icon mapping for external links
+const iconMap: { [key: string]: any } = {
+  Building2,
+  Zap,
+  Handshake,
+};
+
 // Animated Counter Component
 function AnimatedCounter({target, suffix = ''}: {target: number; suffix?: string}) {
   const [count, setCount] = useState(0);
@@ -76,15 +83,20 @@ export default function Dashboard() {
     // 将外部链接转换为feature格式
     const externalFeatures = externalLinks
       .filter((link) => link.position === 'dashboard' || link.position === 'both')
-      .map((link) => ({
-        title: link.label,
-        desc: link.description || '',
-        icon: link.dashboardIcon || link.icon,
-        iconImage: link.dashboardIconImage || link.iconImage,
-        color: link.color || 'purple',
-        link: link.url,
-        sortOrder: link.sortOrder,
-      }));
+      .map((link) => {
+        const iconName = link.dashboardIcon || link.icon;
+        const IconComponent = iconName && iconMap[iconName] ? iconMap[iconName] : null;
+
+        return {
+          title: link.label,
+          desc: link.description || '',
+          icon: IconComponent,
+          iconImage: link.dashboardIconImage || link.iconImage,
+          color: link.color || 'purple',
+          link: link.url,
+          sortOrder: link.sortOrder,
+        };
+      });
 
     // 合并并排序
     return [...staticFeatures, ...externalFeatures].sort((a, b) => a.sortOrder - b.sortOrder);

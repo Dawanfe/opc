@@ -15,6 +15,9 @@ async function initializeData() {
         description TEXT,
         icon TEXT,
         iconImage TEXT,
+        iconImageActive TEXT,
+        dashboardIcon TEXT,
+        dashboardIconImage TEXT,
         url TEXT NOT NULL,
         position TEXT NOT NULL,
         sortOrder INTEGER DEFAULT 0,
@@ -32,23 +35,30 @@ async function initializeData() {
     if (existing.count === 0) {
       // 插入初始数据
       const insertStmt = db.prepare(`
-        INSERT INTO external_links (key, label, description, icon, iconImage, url, position, sortOrder, enabled, hot, color)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO external_links (
+          key, label, description, icon, iconImage, iconImageActive,
+          dashboardIcon, dashboardIconImage, url, position, sortOrder,
+          enabled, hot, color
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       // 插入申请项目投资
       insertStmt.run(
-        'investment',
-        '申请项目投资',
-        '单个OPC项目，申请10-200万投资额度，3个工作日内反馈',
-        null,
-        '/money-rmb.png',
-        'https://mp.weixin.qq.com/s/JS1j0fXw6Tf2t6yrOwbMuQ',
-        'both',
-        2,
-        1,
-        1,
-        'purple'
+        'investment',                                                    // key
+        '申请项目投资',                                                  // label
+        '单个OPC项目，申请10-200万投资额度，3个工作日内反馈',           // description
+        null,                                                            // icon (Lucide图标名，不使用)
+        '/money-rmb.png',                                               // iconImage (侧边栏默认图标)
+        '/money-rmb-active.png',                                        // iconImageActive (侧边栏激活图标)
+        null,                                                            // dashboardIcon (首页卡片Lucide图标，不使用)
+        '/money-rmb-card.png',                                          // dashboardIconImage (首页卡片图标)
+        'https://mp.weixin.qq.com/s/JS1j0fXw6Tf2t6yrOwbMuQ',          // url
+        'both',                                                          // position (侧边栏+首页卡片)
+        2,                                                               // sortOrder
+        1,                                                               // enabled
+        1,                                                               // hot
+        'purple'                                                         // color
       );
 
       // 插入OpenClaw学习中心
@@ -57,6 +67,9 @@ async function initializeData() {
         'OpenClaw学习中心',
         'AI开发框架教程，快速上手构建智能应用',
         'GraduationCap',
+        null,
+        null,
+        null,
         null,
         'https://weopc.com.cn/openclaw',
         'sidebar',
@@ -68,10 +81,25 @@ async function initializeData() {
 
       db.close();
       return NextResponse.json({ message: 'Initialized successfully', count: 2 });
-    }
+    } else {
+      // 已有数据，检查是否需要更新investment记录
+      const investmentRecord = db.prepare('SELECT * FROM external_links WHERE key = ?').get('investment') as any;
 
-    db.close();
-    return NextResponse.json({ message: 'Already initialized', count: existing.count });
+      if (investmentRecord && (!investmentRecord.iconImageActive || !investmentRecord.dashboardIconImage)) {
+        // 更新investment记录，添加激活图标和卡片图标
+        db.prepare(`
+          UPDATE external_links
+          SET iconImageActive = ?, dashboardIconImage = ?, updatedAt = CURRENT_TIMESTAMP
+          WHERE key = ?
+        `).run('/money-rmb-active.png', '/money-rmb-card.png', 'investment');
+
+        db.close();
+        return NextResponse.json({ message: 'Updated investment icons', count: existing.count });
+      }
+
+      db.close();
+      return NextResponse.json({ message: 'Already initialized', count: existing.count });
+    }
   } catch (error) {
     console.error('Error initializing external links:', error);
     return NextResponse.json({ error: 'Failed to initialize' }, { status: 500 });

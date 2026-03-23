@@ -113,7 +113,10 @@
       "Bash(tar xzf /tmp/lucide-static-0.577.0.tgz -C /tmp/lucide-static-pkg --strip-components=1)",
       "Bash(identify /Users/zhanglei/test/opc/taro/src/assets/images/logo.GIF)",
       "Bash(git status -u)",
-      "Bash(git add .claude/settings.local.json)"
+      "Bash(git add .claude/settings.local.json)",
+      "Bash(git pull --rebase origin main)",
+      "Bash(git stash)",
+      "Bash(git stash pop)"
     ]
   }
 }

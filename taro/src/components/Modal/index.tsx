@@ -39,6 +39,7 @@ export default function Modal({ visible, onClose, title, headerExtra, children }
           borderTopLeftRadius: '16px',
           borderTopRightRadius: '16px',
           maxHeight: '85vh',
+          marginBottom: '50px',
         }}
       >
         {/* Header */}
@@ -65,7 +66,7 @@ export default function Modal({ visible, onClose, title, headerExtra, children }
 
         {/* Body */}
         <ScrollView scrollY className='flex-1' style={{ maxHeight: '70vh', padding: '20px' }}>
-          <View style={{ paddingBottom: '20px' }}>
+          <View style={{ paddingBottom: 'calc(20px + env(safe-area-inset-bottom))' }}>
             {children}
           </View>
         </ScrollView>

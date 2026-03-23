@@ -244,7 +244,8 @@ export default function MarketplacePage() {
           <View>
             <Text className='block text-sm font-medium text-gray-900 mb-2'>任务标题</Text>
             <Input
-              className='w-full h-11 px-3 border border-gray-200 rounded-lg text-sm'
+              className='w-full h-11 px-3 rounded-lg text-sm'
+              style={{ border: '1px solid #E5E7EB' }}
               placeholder='简要描述任务内容'
               value={postForm.title}
               onInput={(e) => setPostForm({ ...postForm, title: e.detail.value })}
@@ -261,7 +262,7 @@ export default function MarketplacePage() {
                 setPostForm({ ...postForm, category: catIds[idx] })
               }}
             >
-              <View className='w-full h-11 px-3 border border-gray-200 rounded-lg flex items-center'>
+              <View className='w-full h-11 px-3 rounded-lg flex items-center' style={{ border: '1px solid #E5E7EB' }}>
                 <Text className='text-sm text-gray-500'>
                   {postForm.category ? getCategoryLabel(postForm.category) : '选择类别'}
                 </Text>
@@ -271,7 +272,8 @@ export default function MarketplacePage() {
           <View>
             <Text className='block text-sm font-medium text-gray-900 mb-2'>预算范围</Text>
             <Input
-              className='w-full h-11 px-3 border border-gray-200 rounded-lg text-sm'
+              className='w-full h-11 px-3 rounded-lg text-sm'
+              style={{ border: '1px solid #E5E7EB' }}
               placeholder='¥X,XXX - ¥X,XXX'
               value={postForm.budget}
               onInput={(e) => setPostForm({ ...postForm, budget: e.detail.value })}
@@ -284,7 +286,7 @@ export default function MarketplacePage() {
               value={postForm.deadline}
               onChange={(e) => setPostForm({ ...postForm, deadline: e.detail.value })}
             >
-              <View className='w-full h-11 px-3 border border-gray-200 rounded-lg flex items-center'>
+              <View className='w-full h-11 px-3 rounded-lg flex items-center' style={{ border: '1px solid #E5E7EB' }}>
                 <Text className='text-sm text-gray-500'>{postForm.deadline || '选择日期'}</Text>
               </View>
             </Picker>
@@ -292,7 +294,8 @@ export default function MarketplacePage() {
           <View>
             <Text className='block text-sm font-medium text-gray-900 mb-2'>联系方式</Text>
             <Input
-              className='w-full h-11 px-3 border border-gray-200 rounded-lg text-sm'
+              className='w-full h-11 px-3 rounded-lg text-sm'
+              style={{ border: '1px solid #E5E7EB' }}
               placeholder='手机号/微信/邮箱'
               value={postForm.contact}
               onInput={(e) => setPostForm({ ...postForm, contact: e.detail.value })}
@@ -301,12 +304,12 @@ export default function MarketplacePage() {
           <View>
             <Text className='block text-sm font-medium text-gray-900 mb-2'>任务描述</Text>
             <Textarea
-              className='w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm'
+              className='w-full px-3 py-2.5 rounded-lg text-sm'
+              style={{ border: '1px solid #E5E7EB', height: '120px' }}
               placeholder='详细描述任务需求、交付标准...'
               maxlength={500}
               value={postForm.description}
               onInput={(e) => setPostForm({ ...postForm, description: e.detail.value })}
-              style={{ height: '120px' }}
             />
           </View>
           <View
@@ -329,22 +332,23 @@ export default function MarketplacePage() {
             <View>
               <Text className='block text-sm font-medium text-gray-900 mb-2'>自我介绍</Text>
               <Textarea
-                className='w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm'
+                className='w-full px-3 py-2.5 rounded-lg text-sm'
+                style={{ border: '1px solid #E5E7EB', height: '100px' }}
                 placeholder='简要介绍您的相关经验和优势...'
-                style={{ height: '100px' }}
               />
             </View>
             <View>
               <Text className='block text-sm font-medium text-gray-900 mb-2'>报价</Text>
               <Input
-                className='w-full h-11 px-3 border border-gray-200 rounded-lg text-sm'
+                className='w-full h-11 px-3 rounded-lg text-sm'
+                style={{ border: '1px solid #E5E7EB' }}
                 placeholder='您的报价金额'
               />
             </View>
             <View>
               <Text className='block text-sm font-medium text-gray-900 mb-2'>预计交付时间</Text>
               <Picker mode='date' onChange={() => {}}>
-                <View className='w-full h-11 px-3 border border-gray-200 rounded-lg flex items-center'>
+                <View className='w-full h-11 px-3 rounded-lg flex items-center' style={{ border: '1px solid #E5E7EB' }}>
                   <Text className='text-sm text-gray-500'>选择日期</Text>
                 </View>
               </Picker>

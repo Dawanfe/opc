@@ -94,7 +94,8 @@ export default function ProfilePage() {
               <Text className='text-sm font-medium text-gray-900'>立即注册</Text>
             </View>
             <View
-              className='px-5 py-2.5 border border-gray-500 rounded-lg'
+              className='px-5 py-2.5 rounded-lg'
+              style={{ border: '1px solid rgba(255,255,255,0.4)' }}
               onClick={() => setShowLoginModal(true)}
             >
               <Text className='text-sm font-medium text-white'>已有账号，登录</Text>
@@ -213,7 +214,8 @@ export default function ProfilePage() {
       {/* Logout */}
       <View className='mb-8'>
         <View
-          className='w-full py-3 text-center border border-gray-200 rounded-lg bg-white'
+          className='w-full py-3 text-center rounded-lg bg-white'
+          style={{ border: '1px solid #E5E7EB' }}
           onClick={() => {
             logout()
             Taro.showToast({ title: '已退出登录', icon: 'success' })

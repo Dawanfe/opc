@@ -3,7 +3,7 @@ import { View, Text, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuth } from '../../contexts/AuthContext'
 import { request } from '../../utils/request'
-import { maskPhone, formatMemberId } from '../../utils/format'
+import { maskPhone, formatMemberId, fullUrl } from '../../utils/format'
 import LoginModal from '../../components/LoginModal'
 import Icon from '../../components/Icon'
 
@@ -44,14 +44,14 @@ function ContactUs() {
         <View className='flex gap-4'>
           <View className='flex-1 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden' style={{ height: '180px' }}>
             {groupQr ? (
-              <Image src={groupQr} className='w-full h-full' mode='aspectFit' />
+              <Image src={fullUrl(groupQr)} className='w-full h-full' mode='aspectFit' />
             ) : (
               <Text className='text-sm text-gray-400'>群二维码</Text>
             )}
           </View>
           <View className='flex-1 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden' style={{ height: '180px' }}>
             {wechatQr ? (
-              <Image src={wechatQr} className='w-full h-full' mode='aspectFit' />
+              <Image src={fullUrl(wechatQr)} className='w-full h-full' mode='aspectFit' />
             ) : (
               <Text className='text-sm text-gray-400'>微信二维码</Text>
             )}
@@ -139,7 +139,7 @@ export default function ProfilePage() {
         <View className='flex items-start gap-4'>
           <View className='w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0'>
             {user?.avatar ? (
-              <Image src={user.avatar} className='w-full h-full rounded-full' mode='aspectFill' />
+              <Image src={fullUrl(user.avatar)} className='w-full h-full rounded-full' mode='aspectFill' />
             ) : (
               <Icon name='user' size={28} color='#9CA3AF' />
             )}

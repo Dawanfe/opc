@@ -27,6 +27,13 @@ export function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ')
 }
 
+/** 将 /api/... 相对路径补全为完整 URL（小程序中图片需要完整地址） */
+export function fullUrl(path: string): string {
+  if (!path) return ''
+  if (path.startsWith('http')) return path
+  return `${TARO_APP_BASE_URL}${path}`
+}
+
 export function getTimeAgo(dateString: string): string {
   const now = new Date()
   const date = new Date(dateString)

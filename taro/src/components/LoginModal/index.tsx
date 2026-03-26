@@ -44,6 +44,7 @@ export default function LoginModal() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [focusedField, setFocusedField] = useState('')
+  const [agreed, setAgreed] = useState(false)
 
   useEffect(() => {
     if (showLoginModal) {
@@ -66,6 +67,7 @@ export default function LoginModal() {
     setRegInviteCode('')
     setError('')
     setFocusedField('')
+    setAgreed(false)
   }
 
   const switchTab = (tab: Tab) => {
@@ -74,6 +76,10 @@ export default function LoginModal() {
   }
 
   const handleLogin = async () => {
+    if (!agreed) {
+      setError('请先阅读并同意《用户服务协议》和《隐私政策》')
+      return
+    }
     const phone = loginPhone.replace(/\D/g, '')
     if (phone.length !== 11) {
       setError('请输入正确的手机号')
@@ -95,6 +101,10 @@ export default function LoginModal() {
   }
 
   const handleRegister = async () => {
+    if (!agreed) {
+      setError('请先阅读并同意《用户服务协议》和《隐私政策》')
+      return
+    }
     const phone = regPhone.replace(/\D/g, '')
     if (phone.length !== 11) {
       setError('请输入正确的手机号')
@@ -302,14 +312,34 @@ export default function LoginModal() {
           )}
         </View>
 
-        {/* Footer */}
+        {/* Footer - 隐私政策勾选 */}
         <View className='px-8 pb-8'>
-          <View className='flex items-center justify-center gap-1'>
-            <Icon name='check' size={12} color='#6B7280' />
-            <Text className='text-xs text-gray-400'>登录即表示同意</Text>
-            <Text className='text-xs text-gray-600 underline'>用户协议</Text>
-            <Text className='text-xs text-gray-400'>和</Text>
-            <Text className='text-xs text-gray-600 underline'>隐私政策</Text>
+          <View
+            style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '8px' }}
+            onClick={() => { setAgreed(!agreed); setError('') }}
+          >
+            <View
+              style={{
+                width: '18px',
+                height: '18px',
+                borderRadius: '4px',
+                border: agreed ? 'none' : '1.5px solid #D1D5DB',
+                backgroundColor: agreed ? '#111827' : '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: '1px',
+              }}
+            >
+              {agreed && <Icon name='check' size={12} color='#FFFFFF' />}
+            </View>
+            <Text className='text-xs text-gray-500' style={{ lineHeight: '1.5' }}>
+              我已阅读并同意
+              <Text className='text-gray-700 font-medium' onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/webview/index?url=https://weopc.com.cn/terms&title=用户服务协议' }) }}>《用户服务协议》</Text>
+              和
+              <Text className='text-gray-700 font-medium' onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/webview/index?url=https://weopc.com.cn/privacy&title=隐私政策' }) }}>《隐私政策》</Text>
+            </Text>
           </View>
         </View>
       </View>

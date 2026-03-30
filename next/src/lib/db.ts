@@ -50,6 +50,13 @@ export function initDb() {
       contact TEXT,
       verificationStatus TEXT,
       confidence TEXT,
+      source TEXT DEFAULT 'manual',
+      syncId TEXT,
+      auditStatus TEXT DEFAULT 'pending',
+      auditNotes TEXT,
+      auditedAt DATETIME,
+      auditedBy INTEGER,
+      publishedAt DATETIME,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -236,6 +243,34 @@ export function initDb() {
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // 兼容旧表：添加 Communities 表审核相关字段
+  try {
+    db.exec(`ALTER TABLE communities ADD COLUMN source TEXT DEFAULT 'manual'`);
+  } catch { /* 列已存在 */ }
+  try {
+    db.exec(`ALTER TABLE communities ADD COLUMN syncId TEXT`);
+  } catch { /* 列已存在 */ }
+  try {
+    db.exec(`ALTER TABLE communities ADD COLUMN auditStatus TEXT DEFAULT 'pending'`);
+  } catch { /* 列已存在 */ }
+  try {
+    db.exec(`ALTER TABLE communities ADD COLUMN auditNotes TEXT`);
+  } catch { /* 列已存在 */ }
+  try {
+    db.exec(`ALTER TABLE communities ADD COLUMN auditedAt DATETIME`);
+  } catch { /* 列已存在 */ }
+  try {
+    db.exec(`ALTER TABLE communities ADD COLUMN auditedBy INTEGER`);
+  } catch { /* 列已存在 */ }
+  try {
+    db.exec(`ALTER TABLE communities ADD COLUMN publishedAt DATETIME`);
+  } catch { /* 列已存在 */ }
+
+  // 为 communities 创建索引
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_communities_auditStatus ON communities(auditStatus)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_communities_syncId ON communities(syncId)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_communities_city ON communities(city)`);
 
   // 创建 settings 表（系统配置，如二维码图片等）
   db.exec(`

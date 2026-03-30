@@ -4,6 +4,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import AppShell from "@/components/AppShell";
 import { Toaster } from "sonner";
+import "@/lib/backup"; // 初始化备份模块
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 

@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
+  const includePending = searchParams.get('includePending') === 'true';
 
   try {
     const db = getDb();
@@ -20,7 +21,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(community);
     }
 
-    const communities = db.prepare('SELECT * FROM communities ORDER BY id DESC').all();
+    // 用户侧查询：只返回已发布的数据
+    const query = includePending
+      ? 'SELECT * FROM communities ORDER BY id DESC'
+      : "SELECT * FROM communities WHERE auditStatus = 'published' ORDER BY id DESC";
+
+    const communities = db.prepare(query).all();
     db.close();
 
     return NextResponse.json(communities);

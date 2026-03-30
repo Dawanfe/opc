@@ -8,6 +8,8 @@ export default defineAppConfig({
     'pages/news/index',
     'pages/invite/index',
     'pages/webview/index',
+    'pages/terms/index',
+    'pages/privacy/index',
   ],
   window: {
     backgroundTextStyle: 'light',

@@ -6,7 +6,7 @@ export default function PrivacyPage() {
       <View className="p-4">
         <Text className="block text-2xl font-bold text-gray-900 mb-4">隐私政策</Text>
         <Text className="block text-xs text-gray-500 mb-6">
-          生效日期：2024年1月1日 | 最后更新：2024年1月1日
+          生效日期：2024年3月30日 | 最后更新：2024年3月30日
         </Text>
 
         <View className="bg-white rounded-xl p-5 space-y-6 text-gray-700 leading-relaxed">

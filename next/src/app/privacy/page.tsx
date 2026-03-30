@@ -6,7 +6,7 @@ export default function PrivacyPage() {
 
         <div className="space-y-6 text-gray-700 leading-relaxed">
           <p className="text-gray-500 text-sm">
-            生效日期：2024年1月1日 | 最后更新：{new Date().toLocaleDateString('zh-CN')}
+            生效日期：2024年3月30日 | 最后更新：{new Date().toLocaleDateString('zh-CN')}
           </p>
 
           <section>

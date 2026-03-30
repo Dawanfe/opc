@@ -102,7 +102,7 @@ export default function TermsPage() {
 
           <View className="pt-4 border-t border-gray-200">
             <Text className="text-sm text-gray-500">
-              本协议自发布之日起生效。最后更新日期：2024年1月1日
+              本协议自发布之日起生效。最后更新日期：2024年3月30日
             </Text>
           </View>
         </View>

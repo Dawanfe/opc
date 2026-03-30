@@ -119,7 +119,8 @@
       "Bash(git stash pop)",
       "Bash(sips -g pixelWidth -g pixelHeight /Users/zhanglei/test/opc/taro/src/assets/images/tab-home.png)",
       "Bash(DEST=/Users/zhanglei/test/opc/taro/src/assets/images __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/layout-dashboard.svg -o $DEST/tab-home.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/layout-dashboard-active.svg -o $DEST/tab-home-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/building-2.svg -o $DEST/tab-policy.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/building-2-active.svg -o $DEST/tab-policy-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/briefcase.svg -o $DEST/tab-market.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/briefcase-active.svg -o $DEST/tab-market-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/calendar.svg -o $DEST/tab-events.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/calendar-active.svg -o $DEST/tab-events-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/user-circle.svg -o $DEST/tab-profile.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/user-circle-active.svg -o $DEST/tab-profile-active.png __NEW_LINE_9edc5ad70055f400__ echo 'Done. Verifying:' for f in tab-home tab-home-active tab-policy tab-policy-active tab-market tab-market-active tab-events tab-events-active tab-profile tab-profile-active)",
-      "Bash(do sips:*)"
+      "Bash(do sips:*)",
+      "Bash(git add:*)"
     ]
   }
 }

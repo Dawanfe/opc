@@ -336,9 +336,9 @@ export default function LoginModal() {
             </View>
             <Text className='text-xs text-gray-500' style={{ lineHeight: '1.5' }}>
               我已阅读并同意
-              <Text className='text-gray-700 font-medium' onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/webview/index?url=https://weopc.com.cn/terms&title=用户服务协议' }) }}>《用户服务协议》</Text>
+              <Text className='text-gray-700 font-medium' onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/terms/index' }) }}>《用户服务协议》</Text>
               和
-              <Text className='text-gray-700 font-medium' onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/webview/index?url=https://weopc.com.cn/privacy&title=隐私政策' }) }}>《隐私政策》</Text>
+              <Text className='text-gray-700 font-medium' onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/privacy/index' }) }}>《隐私政策》</Text>
             </Text>
           </View>
         </View>

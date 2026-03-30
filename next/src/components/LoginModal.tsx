@@ -29,6 +29,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [inviteCode, setInviteCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [agreed, setAgreed] = useState(false);
 
   const { login, register, loginWithWechat } = useAuth();
 
@@ -53,6 +54,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setNickname('');
     setInviteCode('');
     setError('');
+    setAgreed(false);
   };
 
   const handleTabSwitch = (tab: 'login' | 'register' | 'wechat') => {
@@ -67,6 +69,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreed) {
+      setError('请先阅读并同意《用户服务协议》和《隐私政策》');
+      return;
+    }
     if (!phone || phone.length !== 11) {
       setError('请输入正确的手机号');
       return;
@@ -89,6 +95,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreed) {
+      setError('请先阅读并同意《用户服务协议》和《隐私政策》');
+      return;
+    }
     if (!phone || phone.length !== 11) {
       setError('请输入正确的手机号');
       return;
@@ -375,14 +385,22 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer - 隐私政策勾选 */}
         <div className="px-8 pb-8">
-          <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-            <Check className="w-3 h-3" />
-            <span>登录即表示同意</span>
-            <a href="#" className="text-gray-600 hover:text-gray-900 underline">用户协议</a>
-            <span>和</span>
-            <a href="#" className="text-gray-600 hover:text-gray-900 underline">隐私政策</a>
+          <div className="flex items-start gap-2 justify-center">
+            <input
+              type="checkbox"
+              id="agree"
+              checked={agreed}
+              onChange={(e) => { setAgreed(e.target.checked); setError(''); }}
+              className="mt-0.5 w-4 h-4 text-gray-900 rounded border-gray-300 focus:ring-gray-900 cursor-pointer"
+            />
+            <label htmlFor="agree" className="text-xs text-gray-500 cursor-pointer flex items-start gap-1">
+              <span>我已阅读并同意</span>
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-gray-700 font-medium hover:text-gray-900 underline">《用户服务协议》</a>
+              <span>和</span>
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-gray-700 font-medium hover:text-gray-900 underline">《隐私政策》</a>
+            </label>
           </div>
         </div>
       </div>

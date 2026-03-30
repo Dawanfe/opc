@@ -1,0 +1,111 @@
+export default function TermsPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">用户服务协议</h1>
+
+        <div className="space-y-6 text-gray-700 leading-relaxed">
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">1. 服务条款的接受</h2>
+            <p>
+              欢迎使用WeOPC平台服务！本用户服务协议（以下简称"本协议"）是您与WeOPC平台运营方之间就使用WeOPC平台服务所订立的协议。
+              当您注册、登录或使用WeOPC平台服务时，即表示您已充分阅读、理解并接受本协议的全部内容。
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">2. 服务内容</h2>
+            <p>WeOPC平台为用户提供以下服务：</p>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li>OPC政策查询与解读</li>
+              <li>工位申请与匹配服务</li>
+              <li>社区联系方式查询</li>
+              <li>活动报名与优先通道</li>
+              <li>需求发布与任务接单</li>
+              <li>邀请好友与积分奖励</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">3. 用户注册</h2>
+            <p>
+              用户在注册时必须提供真实、准确、完整的个人信息。用户应对其提供的个人信息承担全部责任。
+              WeOPC平台有权对用户提交的信息进行审核，对于信息不真实或不完整的用户，WeOPC平台有权拒绝提供服务。
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">4. 用户行为规范</h2>
+            <p>用户在使用WeOPC平台服务时，必须遵守以下规范：</p>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li>不得发布虚假信息、违法信息或不良信息</li>
+              <li>不得侵犯他人知识产权、肖像权、隐私权等合法权益</li>
+              <li>不得利用平台进行欺诈、诈骗等违法活动</li>
+              <li>不得恶意攻击、诽谤他人或平台</li>
+              <li>不得恶意刷单、刷分等行为</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">5. 用户隐私保护</h2>
+            <p>
+              WeOPC平台重视用户隐私保护。我们将严格按照《隐私政策》收集、使用、存储您的个人信息。
+              未经您的同意，我们不会向第三方披露您的个人信息，法律法规另有规定的除外。
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">6. 知识产权</h2>
+            <p>
+              WeOPC平台上的所有内容，包括但不限于文字、图片、音频、视频、软件、程序、版面设计等，
+              均受著作权法、商标法、专利法等法律法规的保护。未经WeOPC平台许可，用户不得复制、传播、使用上述内容。
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">7. 免责声明</h2>
+            <p>
+              WeOPC平台不对以下情况承担责任：
+            </p>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li>因不可抗力导致的服务中断或终止</li>
+              <li>因用户自身操作不当导致的损失</li>
+              <li>因第三方行为导致的损失</li>
+              <li>因网络故障、系统维护等原因导致的服务中断</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">8. 协议的修改</h2>
+            <p>
+              WeOPC平台有权根据需要修改本协议，修改后的协议将在平台上公布。
+              如用户不同意修改后的协议，可以停止使用WeOPC平台服务。如用户继续使用，则视为接受修改后的协议。
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">9. 争议解决</h2>
+            <p>
+              因本协议引起的任何争议，双方应友好协商解决。协商不成的，任何一方可向WeOPC平台所在地人民法院提起诉讼。
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">10. 联系我们</h2>
+            <p>如果您对本协议有任何疑问，请通过以下方式联系我们：</p>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li>邮箱：contact@weopc.com.cn</li>
+              <li>微信公众号：WeOPC</li>
+            </ul>
+          </section>
+
+          <section>
+            <p className="text-sm text-gray-500">
+              本协议自发布之日起生效。最后更新日期：{new Date().toLocaleDateString('zh-CN')}
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  )
+}

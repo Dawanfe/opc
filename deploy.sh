@@ -71,6 +71,14 @@ WECHAT_APP_SECRET=b00822b41733d0dad1d8697774080755
 WECHAT_REDIRECT_URI=https://weopc.com.cn/api/auth/wechat/callback
 NEXT_PUBLIC_FRONTEND_URL=https://weopc.com.cn
 NEXT_PUBLIC_WECHAT_APP_ID=wxb3330c77aa423d29
+
+# OPC 社区同步接口配置（新增）
+COMMUNITY_SYNC_SECRET=$(openssl rand -hex 32)
+COMMUNITY_SYNC_API_KEY=$(openssl rand -hex 16)
+ALLOWED_SYNC_IPS=
+MAX_SYNC_BATCH_SIZE=100
+ENABLE_AUTO_BACKUP=true
+
 ENVEOF
 echo '.env已更新'"
 

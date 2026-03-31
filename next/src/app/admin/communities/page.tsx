@@ -404,52 +404,53 @@ export default function CommunitiesPage() {
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[(community as any).auditStatus] || ''}`}>
                           {statusLabels[(community as any).auditStatus] || (community as any).auditStatus}
                         </span>
-                      ) : '-'}
+                    ) : null}
                     </TableCell>
                     <TableCell className="text-right">
-                  <div className="flex justify-end space-x-1">
-                    {(community as any).auditStatus === 'pending' && (
-                      <>
+                      <div className="flex justify-end space-x-1">
+                        {(community as any).auditStatus === 'pending' && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-green-600 hover:text-green-700"
+                              onClick={() => handleApprove(community.id!)}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleReject(community.id!)}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </Button>
+                          </>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-green-600 hover:text-green-700"
-                          onClick={() => handleApprove(community.id!)}
+                          onClick={() => handleEdit(community)}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
+                          <Pencil className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleReject(community.id!)}
+                          onClick={() => handleDelete(community.id!)}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
+                          <Trash2 className="w-4 h-4" />
                         </Button>
-                      </>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(community)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(community.id!)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>

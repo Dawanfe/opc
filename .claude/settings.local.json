@@ -121,7 +121,21 @@
       "Bash(DEST=/Users/zhanglei/test/opc/taro/src/assets/images __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/layout-dashboard.svg -o $DEST/tab-home.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/layout-dashboard-active.svg -o $DEST/tab-home-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/building-2.svg -o $DEST/tab-policy.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/building-2-active.svg -o $DEST/tab-policy-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/briefcase.svg -o $DEST/tab-market.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/briefcase-active.svg -o $DEST/tab-market-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/calendar.svg -o $DEST/tab-events.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/calendar-active.svg -o $DEST/tab-events-active.png __NEW_LINE_9edc5ad70055f400__ rsvg-convert -w 80 -h 80 /tmp/tab-icons/user-circle.svg -o $DEST/tab-profile.png rsvg-convert -w 80 -h 80 /tmp/tab-icons/user-circle-active.svg -o $DEST/tab-profile-active.png __NEW_LINE_9edc5ad70055f400__ echo 'Done. Verifying:' for f in tab-home tab-home-active tab-policy tab-policy-active tab-market tab-market-active tab-events tab-events-active tab-profile tab-profile-active)",
       "Bash(do sips:*)",
       "Bash(git add:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(tar czf:*)",
+      "Bash(/Users/zhanglei/test/opc/simple-deploy.sh:*)",
+      "Bash(__NEW_LINE_5315502aa2a3376c__ chmod:*)",
+      "Bash(/Users/zhanglei/test/opc/export-docker.sh:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(grep -n \"parseInt\\(params\" next/src/app/api/admin/communities/[id]/approve/route.ts next/src/app/api/admin/communities/[id]/reject/route.ts)",
+      "Bash(sshpass -p 'GAA-lianmeng666' ssh -o StrictHostKeyChecking=no root@101.200.231.179 \"cd /opt/weopc && docker compose ps && echo '''' && curl -sI http://127.0.0.1:13000/api/admin/events 2>/dev/null | head -5\")",
+      "Bash(SECRET=\"1ac7b8910957fc74ef06ee83e1e8d97c65be93a62c753e4fb0863f0d0c1d5479\")",
+      "Bash(API_KEY=\"0b132b2c765dbc330afa590ae4d34201\")",
+      "Bash(__NEW_LINE_68cdad1d21e22c6c__ echo:*)",
+      "Bash(__NEW_LINE_bfc2587405b43ab2__ echo:*)",
+      "Bash(git push:*)",
+      "Bash(jq \"{count: .count, published: [.data[] | select\\(.auditStatus==\"\"published\"\"\\)] | length}\")"
     ]
   }
 }

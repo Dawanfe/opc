@@ -22,8 +22,15 @@ function ContactUs() {
       .then(res => res.json())
       .then((data: any[]) => {
         data.forEach(item => {
-          if (item.key === 'group_qr_url') setGroupQr(item.value || '');
-          if (item.key === 'wechat_qr_url') setWechatQr(item.value || '');
+          const baseUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://weopc.com.cn';
+          if (item.key === 'group_qr_url') {
+            const qrPath = item.value || '';
+            setGroupQr(qrPath.startsWith('http') ? qrPath : `${baseUrl}${qrPath}`);
+          }
+          if (item.key === 'wechat_qr_url') {
+            const qrPath = item.value || '';
+            setWechatQr(qrPath.startsWith('http') ? qrPath : `${baseUrl}${qrPath}`);
+          }
         });
       })
       .catch(() => {});

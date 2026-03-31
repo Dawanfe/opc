@@ -5,6 +5,7 @@ import { getDb } from '@/lib/db';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
+  const auditStatus = searchParams.get('auditStatus');
   const includePending = searchParams.get('includePending') === 'true';
 
   try {
@@ -21,12 +22,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(community);
     }
 
-    // 用户侧查询：只返回已发布的数据
-    const query = includePending
-      ? 'SELECT * FROM communities ORDER BY id DESC'
-      : "SELECT * FROM communities WHERE auditStatus = 'published' ORDER BY id DESC";
+    // 管理后台查询：可以按审核状态筛选
+    let query = 'SELECT * FROM communities ORDER BY id DESC';
+    const params: any[] = [];
 
-    const communities = db.prepare(query).all();
+    if (auditStatus && auditStatus !== 'all') {
+      query = 'SELECT * FROM communities WHERE auditStatus = ? ORDER BY id DESC';
+      params.push(auditStatus);
+    } else if (!includePending) {
+      // 用户侧查询：只返回已发布的数据（向后兼容）
+      query = "SELECT * FROM communities WHERE auditStatus = 'published' ORDER BY publishedAt DESC";
+    }
+
+    const communities = db.prepare(query).all(...params);
     db.close();
 
     return NextResponse.json(communities);

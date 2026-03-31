@@ -64,9 +64,14 @@ export default function CommunitiesPage() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [rejectCommunityId, setRejectCommunityId] = useState<number | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
   const [currentCommunity, setCurrentCommunity] = useState<Community | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuditLoading, setIsAuditLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'published'>('all');
   const itemsPerPage = 10;
 
   const emptyForm: Community = {
@@ -90,11 +95,14 @@ export default function CommunitiesPage() {
 
   useEffect(() => {
     fetchCommunities();
-  }, []);
+  }, [filterStatus]);
 
   const fetchCommunities = async () => {
     try {
-      const res = await fetch(apiUrl('/api/admin/communities'));
+      const url = filterStatus === 'all'
+        ? apiUrl('/api/admin/communities')
+        : apiUrl(`/api/admin/communities?auditStatus=${filterStatus}`);
+      const res = await fetch(url);
       const data = await res.json();
       setCommunities(data);
     } catch (error) {
@@ -202,6 +210,62 @@ export default function CommunitiesPage() {
     setSelectedIds([]);
   };
 
+  // 审核通过
+  const handleApprove = async (id: number) => {
+    setIsAuditLoading(true);
+    try {
+      const res = await fetch(apiUrl(`/api/admin/communities/${id}/approve`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: '' }),
+      });
+      if (res.ok) {
+        toast.success('审核通过');
+        fetchCommunities();
+      } else {
+        toast.error('操作失败');
+      }
+    } catch (error) {
+      toast.error('操作失败');
+    } finally {
+      setIsAuditLoading(false);
+    }
+  };
+
+  // 审核拒绝
+  const handleReject = (id: number) => {
+    setRejectCommunityId(id);
+    setRejectReason('');
+    setIsRejectDialogOpen(true);
+  };
+
+  const confirmReject = async () => {
+    if (!rejectCommunityId) return;
+    if (!rejectReason.trim()) {
+      toast.error('请填写拒绝原因');
+      return;
+    }
+    setIsAuditLoading(true);
+    try {
+      const res = await fetch(apiUrl(`/api/admin/communities/${rejectCommunityId}/reject`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: rejectReason }),
+      });
+      if (res.ok) {
+        toast.success('已拒绝');
+        setIsRejectDialogOpen(false);
+        fetchCommunities();
+      } else {
+        toast.error('操作失败');
+      }
+    } catch (error) {
+      toast.error('操作失败');
+    } finally {
+      setIsAuditLoading(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
@@ -248,6 +312,38 @@ export default function CommunitiesPage() {
         </div>
       </div>
 
+      {/* 审核状态筛选 */}
+      <div className="flex gap-2 mb-6">
+        <Button
+          variant={filterStatus === 'all' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterStatus('all')}
+        >
+          全部
+        </Button>
+        <Button
+          variant={filterStatus === 'pending' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterStatus('pending')}
+        >
+          待审核
+        </Button>
+        <Button
+          variant={filterStatus === 'published' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterStatus('published')}
+        >
+          已发布
+        </Button>
+        <Button
+          variant={filterStatus === 'rejected' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterStatus('rejected')}
+        >
+          已拒绝
+        </Button>
+      </div>
+
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
@@ -264,33 +360,78 @@ export default function CommunitiesPage() {
               <TableHead>城市</TableHead>
               <TableHead>地址</TableHead>
               <TableHead>验证状态</TableHead>
+              <TableHead>审核状态</TableHead>
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedCommunities.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-10 text-muted-foreground">
                   暂无数据
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedCommunities.map((community) => (
-              <TableRow key={community.id}>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedIds.includes(community.id!)}
-                    onCheckedChange={() => toggleSelect(community.id!)}
-                  />
-                </TableCell>
-                <TableCell>{community.id}</TableCell>
-                <TableCell className="font-medium">{community.name}</TableCell>
-                <TableCell>{community.province}</TableCell>
-                <TableCell>{community.city}</TableCell>
-                <TableCell className="max-w-xs truncate">{community.address}</TableCell>
-                <TableCell>{community.verificationStatus}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-2">
+              paginatedCommunities.map((community) => {
+                const statusColors: Record<string, string> = {
+                  pending: 'bg-yellow-100 text-yellow-800',
+                  approved: 'bg-blue-100 text-blue-800',
+                  rejected: 'bg-red-100 text-red-800',
+                  published: 'bg-green-100 text-green-800',
+                };
+                const statusLabels: Record<string, string> = {
+                  pending: '待审核',
+                  approved: '已通过',
+                  rejected: '已拒绝',
+                  published: '已发布',
+                };
+                return (
+                  <TableRow key={community.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.includes(community.id!)}
+                        onCheckedChange={() => toggleSelect(community.id!)}
+                      />
+                    </TableCell>
+                    <TableCell>{community.id}</TableCell>
+                    <TableCell className="font-medium">{community.name}</TableCell>
+                    <TableCell>{community.province}</TableCell>
+                    <TableCell>{community.city}</TableCell>
+                    <TableCell className="max-w-xs truncate">{community.address}</TableCell>
+                    <TableCell>{community.verificationStatus || '-'}</TableCell>
+                    <TableCell>
+                      {(community as any).auditStatus ? (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[(community as any).auditStatus] || ''}`}>
+                          {statusLabels[(community as any).auditStatus] || (community as any).auditStatus}
+                        </span>
+                      ) : '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                  <div className="flex justify-end space-x-1">
+                    {(community as any).auditStatus === 'pending' && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-green-600 hover:text-green-700"
+                          onClick={() => handleApprove(community.id!)}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleReject(community.id!)}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </Button>
+                      </>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -571,6 +712,32 @@ export default function CommunitiesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 拒绝原因对话框 */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>拒绝原因</DialogTitle>
+            <DialogDescription>请填写拒绝该社区的原因</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="请输入拒绝原因..."
+              rows={4}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={confirmReject} disabled={isAuditLoading}>
+              {isAuditLoading ? '处理中...' : '确认拒绝'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

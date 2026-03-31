@@ -56,7 +56,8 @@ export async function POST(request: NextRequest) {
     // 3. API Key 验证（可选，双重保险）
     const expectedApiKey = process.env.COMMUNITY_SYNC_API_KEY;
     if (expectedApiKey && apiKey !== expectedApiKey) {
-      console.warn(`Invalid API Key from IP: ${request.headers.get('x-forwarded-for') || request.ip}`);
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+      console.warn(`Invalid API Key from IP: ${ip}`);
       return NextResponse.json(
         { error: 'Invalid API Key' },
         { status: 401 }
@@ -64,13 +65,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. IP 白名单验证（可选）
-    const allowedIps = process.env.ALLOWED_SYNC_IPS?.split(',') || [];
+    const allowedIpsStr = process.env.ALLOWED_SYNC_IPS || '';
+    const allowedIps = allowedIpsStr ? allowedIpsStr.split(',').map(s => s.trim()).filter(s => s) : [];
     if (allowedIps.length > 0) {
       const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-                       request.headers.get('x-real-ip') ||
-                       request.ip;
-      if (!allowedIps.includes(clientIp)) {
-        console.warn(`Unauthorized IP access: ${clientIp}`);
+                       request.headers.get('x-real-ip');
+      if (!clientIp || !allowedIps.includes(clientIp)) {
+        console.warn(`Unauthorized IP access: ${clientIp || 'unknown'}`);
         return NextResponse.json(
           { error: 'IP not allowed' },
           { status: 403 }
@@ -104,7 +105,8 @@ export async function POST(request: NextRequest) {
     const isValid = verifyRequestSignature(body, timestamp, signature, secret, 300);
 
     if (!isValid) {
-      console.warn(`Invalid signature from IP: ${request.headers.get('x-forwarded-for') || request.ip}`);
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+      console.warn(`Invalid signature from IP: ${ip}`);
       return NextResponse.json(
         { error: 'Invalid signature or expired timestamp' },
         { status: 401 }
@@ -123,8 +125,8 @@ export async function POST(request: NextRequest) {
     // 9. 数据库操作
     const db = getDb();
 
-    // 准备插入/更新语句（使用参数化查询，防SQL注入）
-    const upsertCommunity = db.prepare(`
+    // 准备插入语句
+    const insertCommunity = db.prepare(`
       INSERT INTO communities (
         syncId, province, city, district, name, address, policySummary,
         freeWorkspace, freeAccommodation, computingSupport, investmentSupport,
@@ -132,24 +134,30 @@ export async function POST(request: NextRequest) {
         verificationStatus, confidence, source, auditStatus,
         createdAt, updatedAt
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'cron', 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-      ON CONFLICT(syncId) DO UPDATE SET
-        province = excluded.province,
-        city = excluded.city,
-        district = excluded.district,
-        name = excluded.name,
-        address = excluded.address,
-        policySummary = excluded.policySummary,
-        freeWorkspace = excluded.freeWorkspace,
-        freeAccommodation = excluded.freeAccommodation,
-        computingSupport = excluded.computingSupport,
-        investmentSupport = excluded.investmentSupport,
-        registrationSupport = excluded.registrationSupport,
-        otherServices = excluded.otherServices,
-        benefitCount = excluded.benefitCount,
-        contact = excluded.contact,
-        verificationStatus = excluded.verificationStatus,
-        confidence = excluded.confidence,
+    `);
+
+    // 准备更新语句
+    const updateCommunity = db.prepare(`
+      UPDATE communities SET
+        province = ?,
+        city = ?,
+        district = ?,
+        name = ?,
+        address = ?,
+        policySummary = ?,
+        freeWorkspace = ?,
+        freeAccommodation = ?,
+        computingSupport = ?,
+        investmentSupport = ?,
+        registrationSupport = ?,
+        otherServices = ?,
+        benefitCount = ?,
+        contact = ?,
+        verificationStatus = ?,
+        confidence = ?,
+        source = 'cron',
         updatedAt = CURRENT_TIMESTAMP
+      WHERE syncId = ?
     `);
 
     // 批量插入（事务）
@@ -164,34 +172,73 @@ export async function POST(request: NextRequest) {
             'SELECT id FROM communities WHERE syncId = ?'
           ).get(item.syncId);
           if (existing) {
+            // 更新
+            updateCommunity.run(
+              sanitizeInput(item.province),
+              sanitizeInput(item.city),
+              sanitizeInput(item.district),
+              sanitizeInput(item.name),
+              sanitizeInput(item.address),
+              sanitizeInput(item.policySummary),
+              sanitizeInput(item.freeWorkspace),
+              sanitizeInput(item.freeAccommodation),
+              sanitizeInput(item.computingSupport),
+              sanitizeInput(item.investmentSupport),
+              sanitizeInput(item.registrationSupport),
+              sanitizeInput(item.otherServices),
+              item.benefitCount || 0,
+              sanitizeInput(item.contact),
+              sanitizeInput(item.verificationStatus),
+              sanitizeInput(item.confidence),
+              item.syncId
+            );
             updated++;
           } else {
+            // 插入
+            insertCommunity.run(
+              item.syncId || null,
+              sanitizeInput(item.province),
+              sanitizeInput(item.city),
+              sanitizeInput(item.district),
+              sanitizeInput(item.name),
+              sanitizeInput(item.address),
+              sanitizeInput(item.policySummary),
+              sanitizeInput(item.freeWorkspace),
+              sanitizeInput(item.freeAccommodation),
+              sanitizeInput(item.computingSupport),
+              sanitizeInput(item.investmentSupport),
+              sanitizeInput(item.registrationSupport),
+              sanitizeInput(item.otherServices),
+              item.benefitCount || 0,
+              sanitizeInput(item.contact),
+              sanitizeInput(item.verificationStatus),
+              sanitizeInput(item.confidence)
+            );
             inserted++;
           }
         } else {
+          // 没有 syncId，直接插入
+          insertCommunity.run(
+            null,
+            sanitizeInput(item.province),
+            sanitizeInput(item.city),
+            sanitizeInput(item.district),
+            sanitizeInput(item.name),
+            sanitizeInput(item.address),
+            sanitizeInput(item.policySummary),
+            sanitizeInput(item.freeWorkspace),
+            sanitizeInput(item.freeAccommodation),
+            sanitizeInput(item.computingSupport),
+            sanitizeInput(item.investmentSupport),
+            sanitizeInput(item.registrationSupport),
+            sanitizeInput(item.otherServices),
+            item.benefitCount || 0,
+            sanitizeInput(item.contact),
+            sanitizeInput(item.verificationStatus),
+            sanitizeInput(item.confidence)
+            );
           inserted++;
         }
-
-        // 参数化查询，防SQL注入
-        upsertCommunity.run(
-          item.syncId || null,
-          sanitizeInput(item.province),
-          sanitizeInput(item.city),
-          sanitizeInput(item.district),
-          sanitizeInput(item.name),
-          sanitizeInput(item.address),
-          sanitizeInput(item.policySummary),
-          sanitizeInput(item.freeWorkspace),
-          sanitizeInput(item.freeAccommodation),
-          sanitizeInput(item.computingSupport),
-          sanitizeInput(item.investmentSupport),
-          sanitizeInput(item.registrationSupport),
-          sanitizeInput(item.otherServices),
-          item.benefitCount || 0,
-          sanitizeInput(item.contact),
-          sanitizeInput(item.verificationStatus),
-          sanitizeInput(item.confidence)
-        );
       }
 
       return { inserted, updated };

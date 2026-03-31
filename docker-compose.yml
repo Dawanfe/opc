@@ -14,7 +14,14 @@ services:
       - WECHAT_APP_SECRET=${WECHAT_APP_SECRET:-}
       - WECHAT_REDIRECT_URI=${WECHAT_REDIRECT_URI:-https://weopc.com.cn/api/auth/wechat/callback}
       - NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL:-https://weopc.com.cn}
+      - NEXT_PUBLIC_WECHAT_APP_ID=${WECHAT_APP_ID:-}
       - TZ=Asia/Shanghai
+      # OPC 社区同步接口配置
+      - COMMUNITY_SYNC_SECRET=${COMMUNITY_SYNC_SECRET:-}
+      - COMMUNITY_SYNC_API_KEY=${COMMUNITY_SYNC_API_KEY:-}
+      - ALLOWED_SYNC_IPS=${ALLOWED_SYNC_IPS:-}
+      - MAX_SYNC_BATCH_SIZE=${MAX_SYNC_BATCH_SIZE:-100}
+      - ENABLE_AUTO_BACKUP=${ENABLE_AUTO_BACKUP:-true}
     volumes:
       - weopc-data:/app/data
     healthcheck:

@@ -269,7 +269,7 @@ export function initDb() {
 
   // 为 communities 创建索引
   db.exec(`CREATE INDEX IF NOT EXISTS idx_communities_auditStatus ON communities(auditStatus)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_communities_syncId ON communities(syncId)`);
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_communities_syncId ON communities(syncId) WHERE syncId IS NOT NULL`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_communities_city ON communities(city)`);
 
   // 创建 settings 表（系统配置，如二维码图片等）

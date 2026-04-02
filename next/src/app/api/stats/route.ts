@@ -6,11 +6,11 @@ export async function GET() {
   try {
     const db = getDb();
 
-    // 获取社区总数
-    const communityCount = (db.prepare('SELECT COUNT(*) as count FROM communities').get() as any).count;
+    // 获取已发布的社区总数
+    const communityCount = (db.prepare("SELECT COUNT(*) as count FROM communities WHERE auditStatus = 'published'").get() as any).count;
 
-    // 获取不重复的城市数
-    const cityCount = (db.prepare('SELECT COUNT(DISTINCT city) as count FROM communities').get() as any).count;
+    // 获取已发布社区不重复的城市数
+    const cityCount = (db.prepare("SELECT COUNT(DISTINCT city) as count FROM communities WHERE auditStatus = 'published'").get() as any).count;
 
     // 获取生态伙伴数（暂时硬编码，后续可从数据库获取）
     const partnerCount = 300;

@@ -12,11 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, Users, TrendingUp, Eye, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Users, TrendingUp, Eye, Upload, Loader2, Save } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { apiUrl } from '@/lib/utils';
 import { useRef } from 'react';
+import { Input } from '@/components/ui/input';
 
 interface DailyStat {
   date: string;
@@ -44,6 +45,9 @@ export default function MemberStatsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingGroup, setUploadingGroup] = useState(false);
   const [uploadingWechat, setUploadingWechat] = useState(false);
+  const [editingBaseCount, setEditingBaseCount] = useState(false);
+  const [baseCountInput, setBaseCountInput] = useState('5000');
+  const [savingBaseCount, setSavingBaseCount] = useState(false);
   const groupFileRef = useRef<HTMLInputElement>(null);
   const wechatFileRef = useRef<HTMLInputElement>(null);
 
@@ -51,6 +55,11 @@ export default function MemberStatsPage() {
     fetchStats();
     fetchQrSettings();
   }, []);
+
+  // 当 baseCount 更新时，同步到输入框
+  useEffect(() => {
+    setBaseCountInput(baseCount.toString());
+  }, [baseCount]);
 
   const fetchStats = async () => {
     try {
@@ -115,6 +124,36 @@ export default function MemberStatsPage() {
     }
   };
 
+  const handleSaveBaseCount = async () => {
+    const newBaseCount = parseInt(baseCountInput);
+    if (isNaN(newBaseCount) || newBaseCount < 0) {
+      toast.error('请输入有效的基数');
+      return;
+    }
+
+    setSavingBaseCount(true);
+    try {
+      const res = await fetch(apiUrl('/api/admin/member-stats'), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ baseCount: newBaseCount }),
+      });
+
+      if (res.ok) {
+        setBaseCount(newBaseCount);
+        setEditingBaseCount(false);
+        toast.success('基数已更新');
+        fetchStats(); // 重新获取统计数据
+      } else {
+        toast.error('更新失败');
+      }
+    } catch {
+      toast.error('更新失败');
+    } finally {
+      setSavingBaseCount(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-10">
       <div className="flex items-center space-x-4 mb-6">
@@ -144,9 +183,48 @@ export default function MemberStatsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-pink-500" />
-              <CardTitle className="text-sm font-medium text-muted-foreground">对外展示数</CardTitle>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-pink-500" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">对外展示数</CardTitle>
+              </div>
+              {!editingBaseCount ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingBaseCount(true)}
+                >
+                  修改基数
+                </Button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={baseCountInput}
+                    onChange={(e) => setBaseCountInput(e.target.value)}
+                    className="w-32 h-8 text-sm"
+                    disabled={savingBaseCount}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleSaveBaseCount}
+                    disabled={savingBaseCount}
+                  >
+                    {savingBaseCount ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingBaseCount(false);
+                      setBaseCountInput(baseCount.toString());
+                    }}
+                    disabled={savingBaseCount}
+                  >
+                    取消
+                  </Button>
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent>

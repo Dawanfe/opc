@@ -135,7 +135,8 @@
       "Bash(__NEW_LINE_68cdad1d21e22c6c__ echo:*)",
       "Bash(__NEW_LINE_bfc2587405b43ab2__ echo:*)",
       "Bash(git push:*)",
-      "Bash(jq \"{count: .count, published: [.data[] | select\\(.auditStatus==\"\"published\"\"\\)] | length}\")"
+      "Bash(jq \"{count: .count, published: [.data[] | select\\(.auditStatus==\"\"published\"\"\\)] | length}\")",
+      "Bash(docker-compose ps:*)"
     ]
   }
 }

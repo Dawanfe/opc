@@ -26,7 +26,7 @@ export async function GET() {
     // 格式化展示数量：过万显示为 xx万+
     let formattedCount: string | number;
     if (displayCount >= 10000) {
-      const wan = (displayCount / 10000).toFixed(1);
+      const wan = Math.floor(displayCount / 10000);
       formattedCount = `${wan}万+`;
     } else {
       formattedCount = displayCount;

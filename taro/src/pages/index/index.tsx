@@ -10,7 +10,7 @@ import Icon from '../../components/Icon'
 
 export default function Index() {
   const { setShowLoginModal } = useAuth()
-  const [memberCount, setMemberCount] = useState(5001)
+  const [memberCount, setMemberCount] = useState<number | string>(5001)
   const [cityCount, setCityCount] = useState(26)
   const [communityCount, setCommunityCount] = useState(39)
   const [partnerCount, setPartnerCount] = useState(300)
@@ -60,8 +60,11 @@ export default function Index() {
   }, [communityCount, partnerCount, externalLinks])
 
   useEffect(() => {
-    request<{ displayCount: number }>({ url: '/api/member-count' })
-      .then((data) => { if (data.displayCount) setMemberCount(data.displayCount) })
+    request<{ displayCount: number; formattedCount: string }>({ url: '/api/member-count' })
+      .then((data) => {
+        if (data.formattedCount) setMemberCount(data.formattedCount)
+        else if (data.displayCount) setMemberCount(data.displayCount)
+      })
       .catch(() => {})
 
     request<{ cityCount: number; communityCount: number; partnerCount: number }>({ url: '/api/stats' })
@@ -133,7 +136,11 @@ export default function Index() {
           </View>
           <View className='bg-white p-6 rounded-xl border border-gray-200 shadow-card'>
             <View className='text-3xl font-bold text-pink-500 mb-1'>
-              <AnimatedCounter target={memberCount} />
+              {typeof memberCount === 'string' ? (
+                <Text>{memberCount}</Text>
+              ) : (
+                <AnimatedCounter target={memberCount} />
+              )}
             </View>
             <Text className='text-sm text-gray-500'>OPC会员</Text>
           </View>

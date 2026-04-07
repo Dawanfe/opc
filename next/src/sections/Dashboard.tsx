@@ -18,7 +18,7 @@ const iconMap: { [key: string]: any } = {
   Handshake,
 };
 
-// Animated Counter Component
+// Animated Counter Component - 用于数字动画
 function AnimatedCounter({target, suffix = ''}: {target: number; suffix?: string}) {
   const [count, setCount] = useState(0);
 
@@ -44,9 +44,14 @@ function AnimatedCounter({target, suffix = ''}: {target: number; suffix?: string
   return <span>{count.toLocaleString()}{suffix}</span>;
 }
 
+// Static Counter Component - 用于直接显示（如 "40.0万+"）
+function StaticCounter({value}: {value: string}) {
+  return <span>{value}</span>;
+}
+
 export default function Dashboard() {
   const {setShowLoginModal} = useAuth();
-  const [memberCount, setMemberCount] = useState(5001);
+  const [memberCount, setMemberCount] = useState<number | string>(5001);
   const [cityCount, setCityCount] = useState(26);
   const [communityCount, setCommunityCount] = useState(39);
   const [partnerCount, setPartnerCount] = useState(300);
@@ -176,7 +181,11 @@ export default function Dashboard() {
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-pink-500 mb-1">
-              <AnimatedCounter target={memberCount} />
+              {typeof memberCount === 'string' ? (
+                <StaticCounter value={memberCount} />
+              ) : (
+                <AnimatedCounter target={memberCount} />
+              )}
             </div>
             <div className="text-sm text-gray-500">OPC会员</div>
           </div>

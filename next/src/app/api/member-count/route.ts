@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
-const BASE_COUNT = 5001;
+const DEFAULT_BASE_COUNT = 5000;
 
 // GET - 获取对外展示的会员数
 export async function GET() {
   try {
     const db = getDb();
+
+    // 从 settings 表获取基数，如果没有则使用默认值
+    const baseCountSetting = db.prepare("SELECT value FROM settings WHERE key = 'member_base_count'").get() as any;
+    const baseCount = baseCountSetting ? parseInt(baseCountSetting.value) : DEFAULT_BASE_COUNT;
 
     // 获取所有随机增量的总和
     const result = db.prepare(
@@ -17,7 +21,7 @@ export async function GET() {
 
     db.close();
 
-    const displayCount = Math.floor(BASE_COUNT + result.totalIncrement);
+    const displayCount = Math.floor(baseCount + result.totalIncrement);
 
     return NextResponse.json({
       displayCount,
@@ -25,6 +29,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching member count:', error);
-    return NextResponse.json({ displayCount: BASE_COUNT, realCount: 0 });
+    return NextResponse.json({ displayCount: DEFAULT_BASE_COUNT, realCount: 0 });
   }
 }

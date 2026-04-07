@@ -23,12 +23,26 @@ export async function GET() {
 
     const displayCount = Math.floor(baseCount + result.totalIncrement);
 
+    // 格式化展示数量：过万显示为 xx万+
+    let formattedCount: string | number;
+    if (displayCount >= 10000) {
+      const wan = (displayCount / 10000).toFixed(1);
+      formattedCount = `${wan}万+`;
+    } else {
+      formattedCount = displayCount;
+    }
+
     return NextResponse.json({
       displayCount,
+      formattedCount,
       realCount,
     });
   } catch (error) {
     console.error('Error fetching member count:', error);
-    return NextResponse.json({ displayCount: DEFAULT_BASE_COUNT, realCount: 0 });
+    return NextResponse.json({
+      displayCount: DEFAULT_BASE_COUNT,
+      formattedCount: `${(DEFAULT_BASE_COUNT / 10000).toFixed(1)}万+`,
+      realCount: 0
+    });
   }
 }

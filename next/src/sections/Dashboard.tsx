@@ -107,7 +107,8 @@ export default function Dashboard() {
     fetch(apiUrl('/api/member-count'))
       .then(res => res.json())
       .then(data => {
-        if (data.displayCount) setMemberCount(data.displayCount);
+        if (data.formattedCount) setMemberCount(data.formattedCount);
+        else if (data.displayCount) setMemberCount(data.displayCount);
       })
       .catch(() => {});
 

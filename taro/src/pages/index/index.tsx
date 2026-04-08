@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { View, Text, Image } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage } from '@tarojs/taro'
 import { useAuth } from '../../contexts/AuthContext'
 import { request } from '../../utils/request'
 import { ASSET_URL } from '../../constants'
@@ -15,6 +15,13 @@ export default function Index() {
   const [communityCount, setCommunityCount] = useState(39)
   const [partnerCount, setPartnerCount] = useState(300)
   const [externalLinks, setExternalLinks] = useState<any[]>([])
+
+  // 分享配置
+  useShareAppMessage(() => ({
+    title: 'WeOPC - 全国一站式OPC服务平台',
+    path: '/pages/index/index',
+    imageUrl: ''
+  }))
 
   const features = useMemo(() => {
     const staticFeatures = [

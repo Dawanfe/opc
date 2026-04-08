@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
 import { useAuth } from '../../contexts/AuthContext'
+import { useShareAppMessage } from '@tarojs/taro'
 import { request } from '../../utils/request'
 import { CITY_FILTERS } from '../../constants'
 import SearchBar from '../../components/SearchBar'
@@ -32,6 +33,13 @@ const cityFilterItems = CITY_FILTERS.map((c) => ({ id: c, label: c }))
 
 export default function PolicyPage() {
   const { isLoggedIn, setShowLoginModal } = useAuth()
+
+  // 分享配置
+  useShareAppMessage(() => ({
+    title: 'WeOPC - 全国OPC社区优惠政策',
+    path: '/pages/policy/index',
+    imageUrl: ''
+  }))
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCity, setSelectedCity] = useState('全部')
   const [selectedPolicy, setSelectedPolicy] = useState<PolicyItem | null>(null)

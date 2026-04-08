@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Input, Textarea, Picker, Image } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage } from '@tarojs/taro'
 import { useAuth } from '../../contexts/AuthContext'
 import { request } from '../../utils/request'
 import { DEMAND_CATEGORIES } from '../../constants'
@@ -48,6 +48,13 @@ const filterItems = [
 
 export default function MarketplacePage() {
   const { isLoggedIn, setShowLoginModal } = useAuth()
+
+  // 分享配置
+  useShareAppMessage(() => ({
+    title: 'WeOPC - AI需求市场',
+    path: '/pages/marketplace/index',
+    imageUrl: ''
+  }))
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedGig, setSelectedGig] = useState<Gig | null>(null)

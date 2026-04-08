@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Image } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useShareAppMessage } from '@tarojs/taro'
 import { useAuth } from '../../contexts/AuthContext'
 import { request } from '../../utils/request'
 import { maskPhone, formatMemberId, fullUrl } from '../../utils/format'
@@ -64,6 +64,13 @@ function ContactUs() {
 
 export default function ProfilePage() {
   const { isLoggedIn, user, setShowLoginModal, logout } = useAuth()
+
+  // 分享配置
+  useShareAppMessage(() => ({
+    title: 'WeOPC - 会员中心',
+    path: '/pages/profile/index',
+    imageUrl: ''
+  }))
 
   if (!isLoggedIn) {
     return (

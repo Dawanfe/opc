@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { View, Text } from '@tarojs/components'
-import Taro, { usePullDownRefresh, useReachBottom } from '@tarojs/taro'
+import Taro, { usePullDownRefresh, useReachBottom, useShareAppMessage } from '@tarojs/taro'
 import { request } from '../../utils/request'
 import Empty from '../../components/Empty'
 import Icon from '../../components/Icon'
@@ -22,6 +22,13 @@ const PAGE_SIZE = 20
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([])
   const [page, setPage] = useState(1)
+
+  // 分享配置
+  useShareAppMessage(() => ({
+    title: 'WeOPC - AI社区活动',
+    path: '/pages/events/index',
+    imageUrl: ''
+  }))
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [total, setTotal] = useState(0)

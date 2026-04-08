@@ -3,12 +3,17 @@
   "projectname": "weopc-mini",
   "description": "WeOPC小程序",
   "appid": "touristappid",
+  "debug": false,
   "setting": {
     "urlCheck": false,
     "es6": true,
     "enhance": true,
     "postcss": true,
-    "minified": true
+    "minified": true,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "disableUseStrict": false,
+    "ignoreUploadUnusedFiles": true
   },
   "compileType": "miniprogram",
   "condition": {}

@@ -5,12 +5,10 @@
   "appid": "touristappid",
   "setting": {
     "urlCheck": false,
-    "es6": false,
-    "enhance": false,
-    "compileHotReLoad": false,
-    "postcss": false,
-    "minified": false,
-    "bundle": false
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
   },
   "compileType": "miniprogram",
   "condition": {}

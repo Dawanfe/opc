@@ -10,7 +10,7 @@ import Icon from '../../components/Icon'
 
 export default function Index() {
   const { setShowLoginModal } = useAuth()
-  const [memberCount, setMemberCount] = useState<number | string>(5001)
+  const [memberCount, setMemberCount] = useState<number | string>('43万+')
   const [cityCount, setCityCount] = useState(26)
   const [communityCount, setCommunityCount] = useState(39)
   const [partnerCount, setPartnerCount] = useState(300)

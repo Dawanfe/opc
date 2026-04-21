@@ -187,7 +187,7 @@ export default function Dashboard() {
                 <AnimatedCounter target={memberCount} />
               )}
             </div>
-            <div className="text-sm text-gray-500">OPC会员</div>
+            <div className="text-sm text-gray-500">OPC用户</div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-blue-500 mb-1">

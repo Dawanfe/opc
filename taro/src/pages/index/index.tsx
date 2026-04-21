@@ -149,7 +149,7 @@ export default function Index() {
                 <AnimatedCounter target={memberCount} />
               )}
             </View>
-            <Text className='text-sm text-gray-500'>OPC会员</Text>
+            <Text className='text-sm text-gray-500'>OPC用户</Text>
           </View>
           <View className='bg-white p-6 rounded-xl border border-gray-200 shadow-card'>
             <View className='text-3xl font-bold text-blue-500 mb-1'>

@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   GraduationCap,
+  Trophy,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -31,6 +32,7 @@ const iconMap: { [key: string]: any } = {
   Newspaper,
   UserCircle,
   GraduationCap,
+  Trophy,
 };
 
 const staticNavItems = [
@@ -39,6 +41,7 @@ const staticNavItems = [
   { id: 'marketplace', label: '需求广场', icon: Briefcase, href: '/marketplace', sortOrder: 3 },
   { id: 'events', label: 'AI热门活动', icon: Calendar, href: '/events', sortOrder: 4 },
   { id: 'news', label: '每日AI新闻', icon: Newspaper, href: '/news', sortOrder: 5 },
+  { id: 'pioneers', label: 'OPC先锋', icon: Trophy, href: '/pioneers', sortOrder: 5.5 },
   { id: 'profile', label: '会员中心', icon: UserCircle, href: '/profile', sortOrder: 6 },
 ];
 
